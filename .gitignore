@@ -1,0 +1,38 @@
+# Build
+target/
+build/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+*.local
+
+# Vaadin
+**/frontend/generated/
+**/frontend/tsconfig.json
+**/src/main/frontend/generated/
+**/node_modules/
+**/package-lock.json
+**/pnpm-lock.yaml
+**/vite.generated.ts
+types.d.ts
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,65 @@
+.brand-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-right: 1.5rem;
+    color: var(--lumo-primary-color);
+}
+
+.page-container {
+    max-width: 760px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.post-card {
+    width: 100%;
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-l);
+    padding: var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-m);
+    background: var(--lumo-base-color);
+}
+
+.post-author {
+    font-weight: 600;
+}
+
+.post-meta {
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-s);
+}
+
+.muted {
+    color: var(--lumo-secondary-text-color);
+}
+
+.chat-shell {
+    height: calc(100vh - 120px);
+    width: 100%;
+}
+
+.conversation-list {
+    width: 300px;
+    border-right: 1px solid var(--lumo-contrast-10pct);
+    overflow-y: auto;
+}
+
+.message-thread {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--lumo-space-m);
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-l);
+    margin-bottom: var(--lumo-space-xs);
+    background: var(--lumo-contrast-5pct);
+    white-space: pre-wrap;
+}
+
+.message-bubble.mine {
+    background: var(--lumo-primary-color-10pct);
+    align-self: flex-end;
+}

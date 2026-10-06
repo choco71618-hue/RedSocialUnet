@@ -1,0 +1,18 @@
+server:
+  port: ${UI_PORT:8081}
+
+spring:
+  application:
+    name: red-social-ui
+
+app:
+  api:
+    base-url: ${API_BASE_URL:http://localhost:8080/api}
+
+vaadin:
+  launch-browser: false
+  whitelisted-packages: com.redsocial.ui
+
+logging:
+  level:
+    com.redsocial: INFO
