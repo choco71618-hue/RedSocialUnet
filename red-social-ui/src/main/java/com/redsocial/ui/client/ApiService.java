@@ -7,10 +7,17 @@ import com.redsocial.common.dto.CommentDto;
 import com.redsocial.common.dto.ConversationDto;
 import com.redsocial.common.dto.CreateCommentRequest;
 import com.redsocial.common.dto.CreatePostRequest;
+import com.redsocial.common.dto.CreateProjectRequest;
+import com.redsocial.common.dto.DonateRequest;
 import com.redsocial.common.dto.LoginRequest;
+import com.redsocial.common.dto.MediaDto;
 import com.redsocial.common.dto.MessageDto;
+import com.redsocial.common.dto.NotificationDto;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
+import com.redsocial.common.dto.ProjectDto;
+import com.redsocial.common.dto.ProjectKind;
+import com.redsocial.common.dto.ProjectStatus;
 import com.redsocial.common.dto.RegisterRequest;
 import com.redsocial.common.dto.SendMessageRequest;
 import com.redsocial.common.dto.StartConversationRequest;
@@ -18,6 +25,7 @@ import com.redsocial.common.dto.UpdateProfileRequest;
 import com.redsocial.common.dto.UserDto;
 import com.redsocial.ui.config.ApiProperties;
 import com.redsocial.ui.session.UserSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -28,6 +36,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Component
+@VaadinSessionScope
 public class ApiService {
 
     private final RestClient client;
@@ -76,6 +85,10 @@ public class ApiService {
         return get("/users/search?q=" + query, new ParameterizedTypeReference<>() {});
     }
 
+    public List<UserDto> suggestions() {
+        return get("/users/suggestions", new ParameterizedTypeReference<>() {});
+    }
+
     public UserDto follow(String username) {
         try {
             return client.post().uri("/users/" + username + "/follow").headers(auth()).retrieve().body(UserDto.class);
@@ -101,9 +114,13 @@ public class ApiService {
     }
 
     public PostDto createPost(String content) {
+        return createPost(content, null);
+    }
+
+    public PostDto createPost(String content, String mediaUrl) {
         try {
             return client.post().uri("/posts").headers(auth())
-                    .body(new CreatePostRequest(content)).retrieve().body(PostDto.class);
+                    .body(new CreatePostRequest(content, mediaUrl)).retrieve().body(PostDto.class);
         } catch (Exception ex) {
             throw translate(ex);
         }
@@ -176,6 +193,111 @@ public class ApiService {
     public void markRead(Long conversationId) {
         try {
             client.post().uri("/conversations/" + conversationId + "/read").headers(auth()).retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public List<ProjectDto> projects(ProjectKind kind, ProjectStatus status) {
+        return projects(kind, status, null);
+    }
+
+    public List<ProjectDto> projects(ProjectKind kind, ProjectStatus status, String creator) {
+        String uri = "/projects";
+        boolean first = true;
+        if (kind != null) {
+            uri += (first ? "?" : "&") + "kind=" + kind;
+            first = false;
+        }
+        if (status != null) {
+            uri += (first ? "?" : "&") + "status=" + status;
+            first = false;
+        }
+        if (creator != null && !creator.isBlank()) {
+            uri += (first ? "?" : "&") + "creator=" + creator;
+        }
+        return get(uri, new ParameterizedTypeReference<>() {});
+    }
+
+    public ProjectDto createProject(CreateProjectRequest request) {
+        try {
+            return client.post().uri("/projects").headers(auth()).body(request).retrieve().body(ProjectDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public ProjectDto donate(Long projectId, java.math.BigDecimal amount) {
+        try {
+            return client.post().uri("/projects/" + projectId + "/donate").headers(auth())
+                    .body(new DonateRequest(amount)).retrieve().body(ProjectDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void deleteProject(Long projectId) {
+        try {
+            client.delete().uri("/projects/" + projectId).headers(auth()).retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public List<NotificationDto> notifications() {
+        return get("/notifications", new ParameterizedTypeReference<>() {});
+    }
+
+    public long unreadNotifications() {
+        try {
+            Long count = client.get().uri("/notifications/unread-count").headers(auth())
+                    .retrieve().body(Long.class);
+            return count == null ? 0 : count;
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void markNotificationRead(Long notificationId) {
+        try {
+            client.post().uri("/notifications/" + notificationId + "/read").headers(auth()).retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void markAllNotificationsRead() {
+        try {
+            client.post().uri("/notifications/read-all").headers(auth()).retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public java.time.Instant presence(String username) {
+        try {
+            return client.get().uri("/users/" + username + "/presence").headers(auth())
+                    .retrieve().body(java.time.Instant.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public MediaDto uploadMedia(byte[] bytes, String contentType, String fileName) {
+        try {
+            var body = new org.springframework.util.LinkedMultiValueMap<String, Object>();
+            var resource = new org.springframework.core.io.ByteArrayResource(bytes) {
+                @Override
+                public String getFilename() {
+                    return fileName;
+                }
+            };
+            body.add("file", resource);
+            body.add("folder", "redsocial");
+            return client.post().uri("/media/upload").headers(auth())
+                    .contentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve().body(MediaDto.class);
         } catch (Exception ex) {
             throw translate(ex);
         }

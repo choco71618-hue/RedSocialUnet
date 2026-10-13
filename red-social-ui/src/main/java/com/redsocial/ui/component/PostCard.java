@@ -4,13 +4,18 @@ import com.redsocial.common.dto.PostDto;
 import com.redsocial.ui.client.ApiException;
 import com.redsocial.ui.client.ApiService;
 import com.redsocial.ui.session.UserSession;
+import com.redsocial.ui.util.AvatarUtil;
+import com.redsocial.ui.util.Toast;
 import com.redsocial.ui.util.TimeFormat;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -33,37 +38,90 @@ public class PostCard extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
+        add(buildHeader(), buildContent(), buildActions());
+    }
+
+    private HorizontalLayout buildHeader() {
+        Avatar avatar = AvatarUtil.create(post.authorDisplayName(), post.authorUsername(), post.authorAvatarUrl());
+        avatar.addClassName("rs-avatar-sm");
+
         Span author = new Span(displayName());
         author.addClassName("post-author");
-        author.getStyle().set("cursor", "pointer");
         author.addClickListener(event -> UI.getCurrent().navigate("profile/" + post.authorUsername()));
 
-        Span meta = new Span("@" + post.authorUsername() + " · " + TimeFormat.relative(post.createdAt()));
-        meta.addClassName("post-meta");
+        Span handle = new Span("@" + post.authorUsername());
+        handle.addClassName("post-handle");
+        Span separator = new Span("·");
+        separator.addClassName("post-handle");
+        Span time = new Span(TimeFormat.relative(post.createdAt()));
+        time.addClassName("post-handle");
+
+        HorizontalLayout meta = new HorizontalLayout(author, handle, separator, time);
+        meta.setPadding(false);
+        meta.setSpacing(true);
+        meta.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        HorizontalLayout header = new HorizontalLayout(avatar, meta);
+        header.setWidthFull();
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        return header;
+    }
+
+    private VerticalLayout buildContent() {
+        VerticalLayout contentBlock = new VerticalLayout();
+        contentBlock.setPadding(false);
+        contentBlock.setSpacing(true);
 
         Paragraph content = new Paragraph(post.content());
-        content.getStyle().set("white-space", "pre-wrap");
-        content.getStyle().set("margin", "0.5rem 0");
+        content.addClassName("post-content");
+        contentBlock.add(content);
 
-        HorizontalLayout actions = buildActions();
+        if (post.mediaUrl() != null && !post.mediaUrl().isBlank()) {
+            com.vaadin.flow.component.html.Image image = new com.vaadin.flow.component.html.Image(post.mediaUrl(), "imagen");
+            image.addClassName("post-media");
+            image.setWidthFull();
+            image.getElement().setProperty("data-loaded", "false");
+            image.getElement().addEventListener("load", e ->
+                    image.getElement().setProperty("data-loaded", "true"));
+            image.addClickListener(event -> openLightbox(post.mediaUrl()));
+            contentBlock.add(image);
+        }
+        return contentBlock;
+    }
 
-        add(new VerticalLayout(author, meta), content, actions);
+    private void openLightbox(String src) {
+        com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog();
+        dialog.getElement().setAttribute("theme", "no-padding");
+        var img = new com.vaadin.flow.component.html.Image(src, "imagen completa");
+        img.addClassName("lightbox-img");
+        dialog.add(img);
+        dialog.setWidth("auto");
+        dialog.setHeight("auto");
+        dialog.setCloseOnOutsideClick(true);
+        dialog.open();
     }
 
     private HorizontalLayout buildActions() {
-        Button like = new Button((post.likedByMe() ? "♥ " : "♡ ") + post.likeCount(), event -> toggleLike());
-        like.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        Button like = new Button(String.valueOf(post.likeCount()), VaadinIcon.HEART.create(), event -> toggleLike());
+        like.addClassName("action-btn");
+        if (post.likedByMe()) {
+            like.addClassName("liked");
+        }
 
-        Button comment = new Button("Comentar (" + post.commentCount() + ")",
+        Button comment = new Button(String.valueOf(post.commentCount()), VaadinIcon.COMMENT.create(),
                 event -> new CommentDialog(post, api, session, onChanged).open());
-        comment.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        comment.addClassName("action-btn");
 
         HorizontalLayout actions = new HorizontalLayout(like, comment);
+        actions.addClassName("post-actions");
+        actions.setPadding(false);
+        actions.setSpacing(true);
 
         boolean mine = session.getUser() != null && Objects.equals(post.authorId(), session.getUser().id());
         if (mine) {
-            Button delete = new Button("Eliminar", event -> deletePost());
-            delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
+            Button delete = new Button(VaadinIcon.TRASH.create(), event -> deletePost());
+            delete.addClassName("action-btn");
+            delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
             actions.add(delete);
         }
         return actions;
@@ -78,7 +136,7 @@ public class PostCard extends VerticalLayout {
             }
             onChanged.run();
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 
@@ -87,7 +145,7 @@ public class PostCard extends VerticalLayout {
             api.deletePost(post.id());
             onChanged.run();
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 

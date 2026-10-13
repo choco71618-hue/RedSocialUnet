@@ -1,21 +1,29 @@
 package com.redsocial.api.config;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import com.redsocial.api.domain.Comment;
 import com.redsocial.api.domain.Conversation;
 import com.redsocial.api.domain.ConversationParticipant;
+import com.redsocial.api.domain.Donation;
 import com.redsocial.api.domain.Follow;
 import com.redsocial.api.domain.Message;
 import com.redsocial.api.domain.Post;
 import com.redsocial.api.domain.PostLike;
+import com.redsocial.api.domain.Project;
 import com.redsocial.api.domain.User;
 import com.redsocial.api.repository.CommentRepository;
 import com.redsocial.api.repository.ConversationParticipantRepository;
 import com.redsocial.api.repository.ConversationRepository;
+import com.redsocial.api.repository.DonationRepository;
 import com.redsocial.api.repository.FollowRepository;
 import com.redsocial.api.repository.MessageRepository;
 import com.redsocial.api.repository.PostLikeRepository;
 import com.redsocial.api.repository.PostRepository;
+import com.redsocial.api.repository.ProjectRepository;
 import com.redsocial.api.repository.UserRepository;
+import com.redsocial.common.dto.ProjectKind;
+import com.redsocial.common.dto.ProjectStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -36,6 +44,8 @@ public class DataSeeder implements CommandLineRunner {
     private final FollowRepository followRepository;
     private final ConversationRepository conversationRepository;
     private final ConversationParticipantRepository participantRepository;
+    private final ProjectRepository projectRepository;
+    private final DonationRepository donationRepository;
     private final MessageRepository messageRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -46,6 +56,8 @@ public class DataSeeder implements CommandLineRunner {
                       FollowRepository followRepository,
                       ConversationRepository conversationRepository,
                       ConversationParticipantRepository participantRepository,
+                      ProjectRepository projectRepository,
+                      DonationRepository donationRepository,
                       MessageRepository messageRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -55,6 +67,8 @@ public class DataSeeder implements CommandLineRunner {
         this.followRepository = followRepository;
         this.conversationRepository = conversationRepository;
         this.participantRepository = participantRepository;
+        this.projectRepository = projectRepository;
+        this.donationRepository = donationRepository;
         this.messageRepository = messageRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -102,6 +116,43 @@ public class DataSeeder implements CommandLineRunner {
                 .conversation(conversation).sender(bob).content("¡Todo listo con Spring Boot!").build());
         conversation.setLastMessageAt(hello.getCreatedAt());
         conversationRepository.save(conversation);
+
+        Project hackaton = projectRepository.save(Project.builder()
+                .creator(alice).kind(ProjectKind.EVENT)
+                .title("Hackatón de la Facultad")
+                .description("48 horas de código e ideas para mejorar la vida universitaria. Equipos, mentores y premios.")
+                .eventDate(LocalDateTime.now().plusDays(12).withHour(9).withMinute(0))
+                .location("Aula Magna, Edificio Central")
+                .build());
+        Project impresion3d = projectRepository.save(Project.builder()
+                .creator(bob).kind(ProjectKind.DONATION)
+                .title("Espacio de Impresión 3D")
+                .description("Acondicionar un rincón del campus con impresoras 3D para que estudiantes puedan prototipar.")
+                .targetAmount(BigDecimal.valueOf(350000))
+                .raisedAmount(BigDecimal.valueOf(120000))
+                .build());
+        projectRepository.save(Project.builder()
+                .creator(carol).kind(ProjectKind.DONATION)
+                .title("Coworking estudiantil")
+                .description("Mesas, sillones y conexiones para armar un espacio de trabajo colaborativo abierto a todos.")
+                .targetAmount(BigDecimal.valueOf(500000))
+                .raisedAmount(BigDecimal.valueOf(200000))
+                .build());
+        projectRepository.save(Project.builder()
+                .creator(bob).kind(ProjectKind.PROJECT)
+                .title("Refacción de aulas")
+                .description("Pintura, bancos y nueva iluminación en las aulas del segundo piso.")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build());
+        projectRepository.save(Project.builder()
+                .creator(alice).kind(ProjectKind.PROJECT)
+                .title("Wi-Fi académico gratuito")
+                .description("Nueva infraestructura de red abierta en biblioteca y patios.")
+                .status(ProjectStatus.PROPOSED)
+                .build());
+
+        donationRepository.save(Donation.builder().project(impresion3d).donor(alice).amount(BigDecimal.valueOf(50000)).build());
+        donationRepository.save(Donation.builder().project(impresion3d).donor(carol).amount(BigDecimal.valueOf(35000)).build());
 
         log.info("Seed completado: usuarios de prueba alice/bob/carol con contraseña 'password123'");
     }

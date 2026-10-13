@@ -9,6 +9,7 @@ public record PostDto(
         String authorDisplayName,
         String authorAvatarUrl,
         String content,
+        String mediaUrl,
         Instant createdAt,
         Instant updatedAt,
         long likeCount,

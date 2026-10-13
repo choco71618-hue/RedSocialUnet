@@ -31,19 +31,22 @@ public class PostService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final DtoMapper mapper;
+    private final NotificationService notificationService;
 
     public PostService(PostRepository postRepository,
                        PostLikeRepository postLikeRepository,
                        CommentRepository commentRepository,
                        UserRepository userRepository,
                        UserService userService,
-                       DtoMapper mapper) {
+                       DtoMapper mapper,
+                       NotificationService notificationService) {
         this.postRepository = postRepository;
         this.postLikeRepository = postLikeRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.mapper = mapper;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -56,9 +59,14 @@ public class PostService {
             throw new BadRequestException("El contenido no puede superar los " + MAX_CONTENT_LENGTH + " caracteres");
         }
         User author = userService.getEntity(currentUserId);
+        String mediaUrl = request.mediaUrl() == null ? null : request.mediaUrl().trim();
+        if (mediaUrl != null && mediaUrl.length() > 500) {
+            throw new BadRequestException("La URL de la imagen no puede superar los 500 caracteres");
+        }
         Post post = postRepository.save(Post.builder()
                 .author(author)
                 .content(content)
+                .mediaUrl(mediaUrl == null || mediaUrl.isEmpty() ? null : mediaUrl)
                 .build());
         return toDto(post, currentUserId);
     }
@@ -86,11 +94,16 @@ public class PostService {
     @Transactional
     public PostDto like(Long currentUserId, Long postId) {
         Post post = getEntity(postId);
-        if (!postLikeRepository.existsByPost_IdAndUser_Id(postId, currentUserId)) {
+        boolean wasNew = !postLikeRepository.existsByPost_IdAndUser_Id(postId, currentUserId);
+        if (wasNew) {
             postLikeRepository.save(PostLike.builder()
                     .post(post)
                     .user(userService.getEntity(currentUserId))
                     .build());
+            User liker = userService.getEntity(currentUserId);
+            notificationService.notify(post.getAuthor(), liker,
+                    com.redsocial.common.dto.NotificationType.LIKE, postId,
+                    "@" + liker.getUsername() + " dio like a tu publicación");
         }
         return toDto(post, currentUserId);
     }

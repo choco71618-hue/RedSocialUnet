@@ -52,6 +52,9 @@ docker compose up -d postgres
 ```
 Opcional (interfaz web de la base): `docker compose --profile tools up -d` → http://localhost:5050
 
+> El contenedor se publica en el puerto **55432** del host (y no en el 5432) para no chocar con una
+> instalación local de PostgreSQL. Cambiable con `DB_PORT` en `.env`.
+
 ### 2. Backend (API REST) — puerto **8080**
 ```bash
 # con PostgreSQL
@@ -84,7 +87,7 @@ Variables de entorno principales (ver `application.yml` de cada módulo):
 
 | Variable | Módulo | Default | Descripción |
 |---|---|---|---|
-| `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | api | localhost / 5432 / redsocial / redsocial / redsocial | Conexión PostgreSQL |
+| `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | api | 127.0.0.1 / 55432 / redsocial / redsocial / redsocial | Conexión PostgreSQL |
 | `JWT_SECRET` | api | *(valor de desarrollo)* | **Cambiar en producción** (mín. 32 caracteres) |
 | `JWT_EXPIRATION_MS` | api | 86400000 | Vigencia del token (24 h) |
 | `CORS_ORIGINS` | api | http://localhost:8081 | Orígenes permitidos |

@@ -3,6 +3,7 @@ package com.redsocial.api.controller;
 import com.redsocial.api.security.UserPrincipal;
 import com.redsocial.api.service.PostService;
 import com.redsocial.api.service.UserService;
+import com.redsocial.api.websocket.PresenceRegistry;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
 import com.redsocial.common.dto.UpdateProfileRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -26,10 +28,13 @@ public class UserController {
 
     private final UserService userService;
     private final PostService postService;
+    private final PresenceRegistry presenceRegistry;
 
-    public UserController(UserService userService, PostService postService) {
+    public UserController(UserService userService, PostService postService,
+                          PresenceRegistry presenceRegistry) {
         this.userService = userService;
         this.postService = postService;
+        this.presenceRegistry = presenceRegistry;
     }
 
     @GetMapping("/me")
@@ -47,6 +52,11 @@ public class UserController {
     public List<UserDto> search(@AuthenticationPrincipal UserPrincipal me,
                                 @RequestParam("q") String query) {
         return userService.search(query, me.id());
+    }
+
+    @GetMapping("/suggestions")
+    public List<UserDto> suggestions(@AuthenticationPrincipal UserPrincipal me) {
+        return userService.suggestions(me.id());
     }
 
     @GetMapping("/{username}")
@@ -85,5 +95,10 @@ public class UserController {
     public UserDto unfollow(@AuthenticationPrincipal UserPrincipal me,
                             @PathVariable String username) {
         return userService.unfollow(me.id(), username);
+    }
+
+    @GetMapping("/{username}/presence")
+    public Instant presence(@PathVariable String username) {
+        return presenceRegistry.lastSeen(username).orElse(null);
     }
 }

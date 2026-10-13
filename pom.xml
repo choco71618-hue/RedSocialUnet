@@ -31,6 +31,7 @@
         <vaadin.version>24.5.4</vaadin.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>2.6.0</springdoc.version>
+        <cloudinary.version>2.5.0</cloudinary.version>
     </properties>
 
     <dependencyManagement>
@@ -39,6 +40,11 @@
                 <groupId>com.redsocial</groupId>
                 <artifactId>red-social-common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudinary</groupId>
+                <artifactId>cloudinary-http5</artifactId>
+                <version>${cloudinary.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>

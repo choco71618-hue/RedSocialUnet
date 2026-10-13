@@ -28,4 +28,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             order by u.username
             """)
     List<User> search(@Param("q") String q, Pageable pageable);
+
+    @Query("""
+            select u from User u
+            where u.id <> :userId
+              and u.id not in (select f.following.id from Follow f where f.follower.id = :userId)
+            order by u.username
+            """)
+    List<User> findSuggestedUsers(@Param("userId") Long userId, Pageable pageable);
 }

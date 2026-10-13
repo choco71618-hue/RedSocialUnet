@@ -36,19 +36,25 @@ public class ChatService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final DtoMapper mapper;
+    private final NotificationService notificationService;
+    private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     public ChatService(ConversationRepository conversationRepository,
                        ConversationParticipantRepository participantRepository,
                        MessageRepository messageRepository,
                        UserRepository userRepository,
                        UserService userService,
-                       DtoMapper mapper) {
+                       DtoMapper mapper,
+                       NotificationService notificationService,
+                       org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate) {
         this.conversationRepository = conversationRepository;
         this.participantRepository = participantRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.mapper = mapper;
+        this.notificationService = notificationService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional
@@ -136,7 +142,14 @@ public class ChatService {
                 .build());
         conversation.setLastMessageAt(message.getCreatedAt());
         conversationRepository.save(conversation);
-        return mapper.toMessageDto(message);
+        User sender = userService.getEntity(senderId);
+        otherParticipant(conversation, senderId).ifPresent(other ->
+                notificationService.notify(other, sender,
+                        com.redsocial.common.dto.NotificationType.MESSAGE, conversation.getId(),
+                        "@" + sender.getUsername() + " te envió un mensaje"));
+        MessageDto dto = mapper.toMessageDto(message);
+        messagingTemplate.convertAndSend("/topic/conversations." + conversation.getId(), dto);
+        return dto;
     }
 
     private Conversation getOrCreate(Long userA, Long userB) {
@@ -160,6 +173,13 @@ public class ChatService {
         if (participantRepository.findByConversation_IdAndUser_Id(conversationId, userId).isEmpty()) {
             throw new ForbiddenException("No participás en esta conversación");
         }
+    }
+
+    private java.util.Optional<User> otherParticipant(Conversation conversation, Long currentUserId) {
+        return participantRepository.findByConversation_Id(conversation.getId()).stream()
+                .map(ConversationParticipant::getUser)
+                .filter(user -> !user.getId().equals(currentUserId))
+                .findFirst();
     }
 
     private ConversationDto toDtoForList(Conversation conversation, Long currentUserId) {

@@ -2,6 +2,7 @@ package com.redsocial.api.service;
 
 import com.redsocial.api.domain.Comment;
 import com.redsocial.api.domain.Post;
+import com.redsocial.api.domain.User;
 import com.redsocial.api.exception.BadRequestException;
 import com.redsocial.api.exception.ForbiddenException;
 import com.redsocial.api.exception.ResourceNotFoundException;
@@ -25,15 +26,18 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserService userService;
     private final DtoMapper mapper;
+    private final NotificationService notificationService;
 
     public CommentService(CommentRepository commentRepository,
                           PostRepository postRepository,
                           UserService userService,
-                          DtoMapper mapper) {
+                          DtoMapper mapper,
+                          NotificationService notificationService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userService = userService;
         this.mapper = mapper;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -60,11 +64,15 @@ public class CommentService {
         }
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> ResourceNotFoundException.of("Publicación", postId));
+        User author = userService.getEntity(currentUserId);
         Comment comment = commentRepository.save(Comment.builder()
                 .post(post)
-                .author(userService.getEntity(currentUserId))
+                .author(author)
                 .content(content)
                 .build());
+        notificationService.notify(post.getAuthor(), author,
+                com.redsocial.common.dto.NotificationType.COMMENT, postId,
+                "@" + author.getUsername() + " comentó tu publicación");
         return mapper.toCommentDto(comment);
     }
 

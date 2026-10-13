@@ -50,6 +50,9 @@ public class User {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+    @Column(name = "cover_url", length = 500)
+    private String coverUrl;
+
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String role = "USER";

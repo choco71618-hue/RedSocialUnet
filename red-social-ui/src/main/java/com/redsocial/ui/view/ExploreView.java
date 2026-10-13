@@ -4,11 +4,14 @@ import com.redsocial.common.dto.UserDto;
 import com.redsocial.ui.client.ApiException;
 import com.redsocial.ui.client.ApiService;
 import com.redsocial.ui.session.UserSession;
+import com.redsocial.ui.util.AvatarUtil;
+import com.redsocial.ui.util.Toast;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,11 +36,11 @@ public class ExploreView extends ProtectedView {
         super(session);
         this.api = api;
 
-        search.setPlaceholder("Buscar usuarios...");
+        search.setPlaceholder("Buscar usuarios por nombre o @usuario...");
         search.setWidthFull();
         search.setClearButtonVisible(true);
 
-        Button searchButton = new Button("Buscar", event -> doSearch());
+        Button searchButton = new Button("Buscar", VaadinIcon.SEARCH.create(), event -> doSearch());
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(search, searchButton);
@@ -46,8 +49,20 @@ public class ExploreView extends ProtectedView {
         bar.setFlexGrow(1, search);
 
         results.setPadding(false);
+        results.setSpacing(false);
 
-        add(new H3("Explorar"), bar, results);
+        add(header(), bar, results);
+    }
+
+    private Div header() {
+        Div header = new Div();
+        header.addClassName("page-header");
+        Span eyebrow = new Span("DESCUBRÍ");
+        eyebrow.addClassName("eyebrow");
+        Span title = new Span("Explorar");
+        title.addClassName("page-title");
+        header.add(eyebrow, title);
+        return header;
     }
 
     @Override
@@ -60,23 +75,21 @@ public class ExploreView extends ProtectedView {
         try {
             List<UserDto> users = api.search(search.getValue() == null ? "" : search.getValue().trim());
             if (users.isEmpty()) {
-                results.add(new Span("Sin resultados"));
+                results.add(emptyState("Sin resultados", "Probá con otro nombre o usuario."));
                 return;
             }
             users.forEach(this::renderUser);
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 
     private void renderUser(UserDto user) {
         Span name = new Span(display(user));
         name.addClassName("post-author");
-        name.getStyle().set("cursor", "pointer");
         name.addClickListener(event -> UI.getCurrent().navigate("profile/" + user.username()));
-
         Span handle = new Span("@" + user.username());
-        handle.addClassName("muted");
+        handle.addClassName("post-handle");
 
         VerticalLayout info = new VerticalLayout(name, handle);
         info.setPadding(false);
@@ -86,20 +99,20 @@ public class ExploreView extends ProtectedView {
         boolean self = session.getUser() != null && Objects.equals(session.getUser().id(), user.id());
         if (self) {
             action = new Button("Ver perfil", event -> UI.getCurrent().navigate("profile"));
+            action.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         } else if (user.following()) {
             action = new Button("Dejar de seguir", event -> toggle(user));
+            action.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         } else {
             action = new Button("Seguir", event -> toggle(user));
             action.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         }
 
-        Span spacer = new Span();
-        HorizontalLayout row = new HorizontalLayout(info, spacer, action);
-        row.setWidthFull();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setFlexGrow(1, spacer);
-        row.addClassName("post-card");
-        results.add(row);
+        Div card = new Div();
+        card.addClassName("user-card");
+        card.addClassName("explore-user-row");
+        card.add(AvatarUtil.of(user), info, action);
+        results.add(card);
     }
 
     private void toggle(UserDto user) {
@@ -111,8 +124,19 @@ public class ExploreView extends ProtectedView {
             }
             doSearch();
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
+    }
+
+    private Div emptyState(String title, String subtitle) {
+        Div div = new Div();
+        div.addClassName("empty-state");
+        Span icon = new Span(VaadinIcon.SEARCH.create());
+        icon.addClassName("empty-icon");
+        Span titleSpan = new Span(title);
+        titleSpan.addClassName("empty-state-title");
+        div.add(icon, titleSpan, new Span(subtitle));
+        return div;
     }
 
     private String display(UserDto user) {

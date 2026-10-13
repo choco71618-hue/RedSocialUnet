@@ -1,45 +1,207 @@
 package com.redsocial.ui.view;
 
+import com.redsocial.common.dto.UserDto;
+import com.redsocial.ui.client.ApiService;
+import com.redsocial.ui.client.RealtimeBridge;
+import com.redsocial.ui.component.NotificationsBell;
 import com.redsocial.ui.session.UserSession;
+import com.redsocial.ui.util.AvatarUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 
-public class MainLayout extends AppLayout {
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-    public MainLayout(UserSession session) {
-        setPrimarySection(Section.NAVBAR);
+public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
+    private final Map<String, Button> navItems = new LinkedHashMap<>();
+    private final UserSession session;
+
+    public MainLayout(UserSession session, ApiService api, RealtimeBridge bridge) {
+        this.session = session;
+        setPrimarySection(Section.DRAWER);
+        setDrawerOpened(true);
+        addClassName("app-layout");
+        addToNavbar(buildNavbar(api));
+        addToDrawer(buildSidebar(session, api, bridge));
+    }
+
+    @Override
+    protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // Auto-cierre de toasts (notificaciones del sistema) tras 3.5s
+        getElement().executeJs("""
+                (() => {
+                  if (window.__rsToastAutoClose) return;
+                  window.__rsToastAutoClose = true;
+                  const TOAST_MS = 3500;
+                  const dismiss = (card) => {
+                    if (card.parentNode) card.parentNode.removeChild(card);
+                  };
+                  setInterval(() => {
+                    document.querySelectorAll('vaadin-notification-card').forEach((card) => {
+                      const host = card.closest && card.closest('vaadin-notification')
+                          || (window.__rsToastHosts || (window.__rsToastHosts = new WeakSet())) && null;
+                      if (card.__rsTimer) return;
+                      card.__rsTimer = setTimeout(() => {
+                        card.__rsTimer = null;
+                        dismiss(card);
+                      }, TOAST_MS);
+                    });
+                  }, 500);
+                  setInterval(() => {
+                    document.querySelectorAll('vaadin-notification').forEach((host) => {
+                      if (host.__rsTimer && !host.hasAttribute('opened') && host.opened !== true) {
+                        // host cerrado, limpiar timers de sus cards
+                      }
+                    });
+                  }, 2000);
+                })();
+                """);
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        String path = event.getLocation().getPath();
+        navItems.forEach((route, button) -> {
+            boolean active = route.isEmpty()
+                    ? (path == null || path.isEmpty())
+                    : path.startsWith(route);
+            button.getElement().getClassList().set("active", active);
+        });
+    }
+
+    private HorizontalLayout buildNavbar(ApiService api) {
         Span brand = new Span("RED-SOCIAL");
-        brand.addClassName("brand-title");
+        brand.addClassName("app-brand");
 
-        Button feed = navButton("Inicio", "");
-        Button explore = navButton("Explorar", "explore");
-        Button chat = navButton("Chat", "chat");
-        Button profile = navButton("Perfil", "profile");
+        com.vaadin.flow.component.textfield.TextField search = new com.vaadin.flow.component.textfield.TextField();
+        search.setPlaceholder("Buscar en el C…");
+        search.setClearButtonVisible(true);
+        search.setPrefixComponent(VaadinIcon.SEARCH.create());
+        search.addClassName("app-search");
+        search.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, event ->
+                UI.getCurrent().navigate("explore?q=" + (search.getValue() == null ? "" : search.getValue().trim())));
+
+        Button post = new Button("Publicar", VaadinIcon.PAPERPLANE.create(),
+                event -> UI.getCurrent().navigate(""));
+        post.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        post.addClassName("app-post-button");
+
+        HorizontalLayout actions = new HorizontalLayout(search, post, userChip());
+        actions.addClassName("app-nav-actions");
+        actions.setPadding(false);
+        actions.setSpacing(false);
+        actions.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        HorizontalLayout navbar = new HorizontalLayout(brand, actions);
+        navbar.addClassName("app-navbar");
+        navbar.setWidthFull();
+        navbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        return navbar;
+    }
+
+    private com.vaadin.flow.component.html.Span userChip() {
+        com.vaadin.flow.component.html.Span chip = new com.vaadin.flow.component.html.Span();
+        chip.addClassName("app-user-chip");
+        UserDto user = session.getUser();
+        if (user != null) {
+            com.vaadin.flow.component.avatar.Avatar avatar = AvatarUtil.of(user);
+            avatar.addClassName("chip-avatar");
+            com.vaadin.flow.component.html.Span name = new com.vaadin.flow.component.html.Span(display(user));
+            name.addClassName("app-user-chip-name");
+            chip.add(avatar, name);
+        }
+        chip.addClickListener(event -> UI.getCurrent().navigate("profile"));
+        return chip;
+    }
+
+    private VerticalLayout buildSidebar(UserSession session, ApiService api, RealtimeBridge bridge) {
+        VerticalLayout sidebar = new VerticalLayout();
+        sidebar.addClassName("app-sidebar");
+        sidebar.setPadding(false);
+        sidebar.setSpacing(false);
+        sidebar.setSizeFull();
+
+        VerticalLayout nav = new VerticalLayout(
+                navItem("", VaadinIcon.HOME, "Inicio"),
+                navItem("explore", VaadinIcon.SEARCH, "Explorar"),
+                navItem("projects", VaadinIcon.ROCKET, "Proyectos"),
+                navItem("chat", VaadinIcon.COMMENTS, "Chat"),
+                navItem("profile", VaadinIcon.USER, "Perfil"));
+        nav.addClassName("app-nav");
+        nav.setPadding(false);
+        nav.setSpacing(false);
+
+        NotificationsBell bell = new NotificationsBell(api, session, bridge);
+        bell.addClassName("app-bell");
 
         Span spacer = new Span();
+        spacer.addClassName("app-spacer");
 
-        Button logout = new Button("Salir", event -> {
+        sidebar.add(nav, bell, spacer, buildUserBox(session));
+        return sidebar;
+    }
+
+    private Button navItem(String route, VaadinIcon icon, String text) {
+        Icon iconComponent = icon.create();
+        iconComponent.addClassName("app-nav-icon");
+        Button button = new Button(text, iconComponent, event -> UI.getCurrent().navigate(route));
+        button.addClassName("app-nav-item");
+        button.setWidthFull();
+        navItems.put(route, button);
+        return button;
+    }
+
+    private VerticalLayout buildUserBox(UserSession session) {
+        VerticalLayout box = new VerticalLayout();
+        box.addClassName("app-user");
+        box.setPadding(false);
+        box.setSpacing(false);
+
+        UserDto user = session.getUser();
+        if (user != null) {
+            Avatar avatar = AvatarUtil.of(user);
+            avatar.addClassName("rs-avatar-sm");
+
+            Span name = new Span(display(user));
+            name.addClassName("app-user-name");
+            Span handle = new Span("@" + user.username());
+            handle.addClassName("app-user-handle");
+            VerticalLayout info = new VerticalLayout(name, handle);
+            info.setPadding(false);
+            info.setSpacing(false);
+
+            HorizontalLayout row = new HorizontalLayout(avatar, info);
+            row.setAlignItems(FlexComponent.Alignment.CENTER);
+            box.add(row);
+        }
+
+        Icon out = VaadinIcon.SIGN_OUT.create();
+        Button logout = new Button("Salir", out, event -> {
             session.logout();
             UI.getCurrent().navigate(LoginView.class);
         });
-        logout.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
-
-        HorizontalLayout navbar = new HorizontalLayout(brand, feed, explore, chat, profile, spacer, logout);
-        navbar.setWidthFull();
-        navbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        navbar.setFlexGrow(1, spacer);
-        addToNavbar(navbar);
+        logout.addClassName("app-logout");
+        logout.setWidthFull();
+        box.add(logout);
+        return box;
     }
 
-    private Button navButton(String text, String route) {
-        Button button = new Button(text, event -> UI.getCurrent().navigate(route));
-        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        return button;
+    private String display(UserDto user) {
+        return user.displayName() == null || user.displayName().isBlank()
+                ? user.username()
+                : user.displayName();
     }
 }

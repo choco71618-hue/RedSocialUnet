@@ -24,15 +24,18 @@ public class UserService {
     private final FollowRepository followRepository;
     private final PostRepository postRepository;
     private final DtoMapper mapper;
+    private final NotificationService notificationService;
 
     public UserService(UserRepository userRepository,
                        FollowRepository followRepository,
                        PostRepository postRepository,
-                       DtoMapper mapper) {
+                       DtoMapper mapper,
+                       NotificationService notificationService) {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
         this.postRepository = postRepository;
         this.mapper = mapper;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +74,13 @@ public class UserService {
             }
             user.setAvatarUrl(avatarUrl.isEmpty() ? null : avatarUrl);
         }
+        if (request.coverUrl() != null) {
+            String coverUrl = request.coverUrl().trim();
+            if (coverUrl.length() > 500) {
+                throw new BadRequestException("La URL del cover no puede superar los 500 caracteres");
+            }
+            user.setCoverUrl(coverUrl.isEmpty() ? null : coverUrl);
+        }
         userRepository.save(user);
         return toDto(user, currentUserId);
     }
@@ -98,6 +108,9 @@ public class UserService {
                 .follower(getEntity(currentUserId))
                 .following(target)
                 .build());
+        User actor = getEntity(currentUserId);
+        notificationService.notify(target, actor, com.redsocial.common.dto.NotificationType.FOLLOW,
+                actor.getId(), "@" + actor.getUsername() + " te siguió");
         return toDto(target, currentUserId);
     }
 
@@ -118,11 +131,18 @@ public class UserService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+@Transactional(readOnly = true)
     public List<UserDto> following(String username, Long currentUserId) {
         User user = findByUsername(username);
         return followRepository.findByFollower_Id(user.getId()).stream()
                 .map(follow -> toDto(follow.getFollowing(), currentUserId))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDto> suggestions(Long currentUserId) {
+        return userRepository.findSuggestedUsers(currentUserId, PageRequest.of(0, 6)).stream()
+                .map(user -> toDto(user, currentUserId))
                 .toList();
     }
 

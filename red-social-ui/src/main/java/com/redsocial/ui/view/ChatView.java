@@ -6,13 +6,20 @@ import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.UserDto;
 import com.redsocial.ui.client.ApiException;
 import com.redsocial.ui.client.ApiService;
+import com.redsocial.ui.client.RealtimeBridge;
 import com.redsocial.ui.session.UserSession;
+import com.redsocial.ui.util.AvatarUtil;
+import com.redsocial.ui.util.Toast;
+import com.redsocial.ui.util.TimeFormat;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -31,14 +38,30 @@ import java.util.Objects;
 public class ChatView extends ProtectedView {
 
     private final ApiService api;
+    private final RealtimeBridge bridge;
     private final VerticalLayout conversationList = new VerticalLayout();
     private final VerticalLayout thread = new VerticalLayout();
     private final TextArea input = new TextArea();
+    private final Span typing = new Span();
     private Long currentConversationId;
+    private final RealtimeBridge.Consumer<MessageDto> messageListener = dto -> {
+        if (dto != null && Objects.equals(dto.conversationId(), currentConversationId)
+                && session.getUser() != null && !Objects.equals(dto.senderId(), session.getUser().id())) {
+            loadThread();
+            loadConversations();
+        }
+    };
+    private final RealtimeBridge.Consumer<RealtimeBridge.TypingInfo> typingListener = info -> {
+        if (info != null && Objects.equals(info.conversationId(), currentConversationId)
+                && session.getUser() != null && !Objects.equals(info.username(), session.getUser().username())) {
+            updateTyping(info.typing());
+        }
+    };
 
-    public ChatView(ApiService api, UserSession session) {
+    public ChatView(ApiService api, UserSession session, RealtimeBridge bridge) {
         super(session);
         this.api = api;
+        this.bridge = bridge;
 
         setSizeFull();
         setPadding(false);
@@ -48,46 +71,58 @@ public class ChatView extends ProtectedView {
         conversationList.setSpacing(false);
         conversationList.setWidthFull();
 
-        Button newConversation = new Button("Nueva conversación", event -> openNewConversation());
+        Button newConversation = new Button("Nueva conversación", VaadinIcon.PLUS.create(),
+                event -> openNewConversation());
         newConversation.setWidthFull();
         newConversation.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 
-        VerticalLayout leftPane = new VerticalLayout(newConversation, conversationList);
+        Span eyebrow = new Span("MENSAJES");
+        eyebrow.addClassName("eyebrow");
+        eyebrow.addClassName("conversation-eyebrow");
+
+        VerticalLayout leftPane = new VerticalLayout(eyebrow, newConversation, conversationList);
+        leftPane.addClassName("conversation-list");
         leftPane.setPadding(true);
         leftPane.setSpacing(true);
-        leftPane.setWidth("320px");
-        leftPane.addClassName("conversation-list");
 
         thread.addClassName("message-thread");
-        thread.setPadding(true);
+        thread.setPadding(false);
         thread.setSpacing(false);
         thread.setWidthFull();
+
+        typing.addClassName("typing-indicator");
+        typing.setVisible(false);
 
         input.setPlaceholder("Escribí un mensaje...");
         input.setWidthFull();
         input.setMaxLength(2000);
+        input.addValueChangeListener(event -> {
+            if (currentConversationId != null) {
+                bridge.sendTyping(currentConversationId, !input.getValue().isEmpty());
+            }
+        });
 
-        Button send = new Button("Enviar", event -> sendCurrent());
+        Button send = new Button("Enviar", VaadinIcon.PAPERPLANE.create(), event -> sendCurrent());
         send.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout composer = new HorizontalLayout(input, send);
+        composer.addClassName("chat-composer");
         composer.setWidthFull();
         composer.setAlignItems(FlexComponent.Alignment.END);
         composer.setFlexGrow(1, input);
-        composer.setPadding(true);
 
-        VerticalLayout threadPane = new VerticalLayout(thread, composer);
+        VerticalLayout threadPane = new VerticalLayout(thread, typing, composer);
         threadPane.setPadding(false);
         threadPane.setSpacing(false);
         threadPane.setSizeFull();
         threadPane.setFlexGrow(1, thread);
 
         HorizontalLayout shell = new HorizontalLayout(leftPane, threadPane);
+        shell.addClassName("chat-shell");
         shell.setSizeFull();
         shell.setPadding(false);
         shell.setSpacing(false);
         shell.setFlexGrow(1, threadPane);
-        shell.addClassName("chat-shell");
 
         add(shell);
     }
@@ -111,7 +146,7 @@ public class ChatView extends ProtectedView {
         }
         if (currentConversationId == null) {
             thread.removeAll();
-            thread.add(new Span("Seleccioná una conversación"));
+            thread.add(emptyState("Elegí una conversación", "Seleccioná un chat de la izquierda o creá uno nuevo."));
         } else {
             loadThread();
         }
@@ -121,51 +156,90 @@ public class ChatView extends ProtectedView {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         getUI().ifPresent(ui -> {
-            ui.setPollInterval(2000);
-            ui.addPollListener(event -> {
-                if (!session.isLoggedIn()) {
-                    return;
-                }
-                if (currentConversationId != null) {
-                    loadThread();
-                }
-                loadConversations();
-            });
+            if (session.getToken() != null) {
+                bridge.connect(session.getToken(), ui);
+            }
         });
+    }
+
+    private void updateTyping(boolean active) {
+        if (active) {
+            typing.setText("Escribiendo…");
+            typing.setVisible(true);
+        } else {
+            typing.setVisible(false);
+            typing.setText("");
+        }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        getUI().ifPresent(ui -> ui.setPollInterval(-1));
+        unsubscribeCurrent();
         super.onDetach(detachEvent);
+    }
+
+    private void subscribeCurrent() {
+        bridge.subscribeConversation(currentConversationId, messageListener);
+        bridge.addTypingHandler(String.valueOf(currentConversationId), typingListener);
+    }
+
+    private void unsubscribeCurrent() {
+        if (currentConversationId != null) {
+            bridge.unsubscribeConversation(currentConversationId);
+            bridge.removeTypingHandler(String.valueOf(currentConversationId));
+        }
     }
 
     private void loadConversations() {
         conversationList.removeAll();
+        for (int i = 0; i < 3; i++) {
+            conversationList.add(com.redsocial.ui.component.Skeleton.card());
+        }
         try {
             List<ConversationDto> conversations = api.conversations();
             if (conversations.isEmpty()) {
-                conversationList.add(new Span("No tenés conversaciones todavía"));
+                conversationList.add(emptyState("Sin conversaciones", "Creá una nueva para empezar."));
                 return;
             }
             for (ConversationDto conversation : conversations) {
-                Button button = new Button(label(conversation));
-                button.setWidthFull();
-                button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-                button.getStyle().set("justify-content", "flex-start");
-                if (conversation.id().equals(currentConversationId)) {
-                    button.getStyle().set("font-weight", "bold");
-                }
-                button.addClickListener(event -> selectConversation(conversation.id()));
-                conversationList.add(button);
+                conversationList.add(conversationItem(conversation));
             }
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 
+    private Div conversationItem(ConversationDto conversation) {
+        Div item = new Div();
+        item.addClassName("conv-item");
+        if (conversation.id().equals(currentConversationId)) {
+            item.addClassName("active");
+        }
+
+        Span name = new Span(display(conversation.otherUser()));
+        name.addClassName("post-author");
+        Span preview = new Span(conversation.lastMessage() == null ? "Sin mensajes" : conversation.lastMessage());
+        preview.addClassName("conv-preview");
+
+        VerticalLayout info = new VerticalLayout(name, preview);
+        info.setPadding(false);
+        info.setSpacing(false);
+        info.addClassName("conv-info");
+
+        item.add(AvatarUtil.of(conversation.otherUser()), info);
+        if (conversation.unreadCount() > 0) {
+            Span badge = new Span(String.valueOf(conversation.unreadCount()));
+            badge.addClassName("conv-badge");
+            item.add(badge);
+        }
+        item.addClickListener(event -> selectConversation(conversation.id()));
+        return item;
+    }
+
     private void selectConversation(Long conversationId) {
+        unsubscribeCurrent();
         currentConversationId = conversationId;
+        subscribeCurrent();
         try {
             api.markRead(conversationId);
         } catch (ApiException ignored) {
@@ -178,33 +252,36 @@ public class ChatView extends ProtectedView {
     private void loadThread() {
         thread.removeAll();
         if (currentConversationId == null) {
-            thread.add(new Span("Seleccioná una conversación"));
+            thread.add(emptyState("Elegí una conversación", "Seleccioná un chat de la izquierda."));
             return;
         }
         try {
             PageResponse<MessageDto> page = api.messages(currentConversationId, 0, 200);
             if (page.content().isEmpty()) {
-                thread.add(new Span("Todavía no hay mensajes. ¡Escribí el primero!"));
+                thread.add(emptyState("Sin mensajes", "Escribí el primero para romper el hielo."));
                 return;
             }
             for (MessageDto message : page.content()) {
-                Span bubble = new Span(message.content());
-                bubble.addClassName("message-bubble");
                 boolean mine = session.getUser() != null
                         && Objects.equals(message.senderId(), session.getUser().id());
+                Span bubble = new Span(message.content());
+                bubble.addClassName("message-bubble");
+                Span time = new Span(TimeFormat.relative(message.createdAt()));
+                time.addClassName("message-time");
                 if (mine) {
                     bubble.addClassName("mine");
+                    time.addClassName("mine");
                 }
-                thread.add(bubble);
+                thread.add(bubble, time);
             }
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 
     private void sendCurrent() {
         if (currentConversationId == null) {
-            Notification.show("Seleccioná una conversación");
+            Toast.show("Seleccioná una conversación");
             return;
         }
         String text = input.getValue();
@@ -214,9 +291,10 @@ public class ChatView extends ProtectedView {
         try {
             api.sendMessage(currentConversationId, text);
             input.clear();
+            bridge.sendTyping(currentConversationId, false);
             loadThread();
         } catch (ApiException ex) {
-            Notification.show(ex.getMessage());
+            Toast.show(ex.getMessage());
         }
     }
 
@@ -232,7 +310,7 @@ public class ChatView extends ProtectedView {
         VerticalLayout results = new VerticalLayout();
         results.setPadding(false);
 
-        Button find = new Button("Buscar", event -> {
+        Button find = new Button("Buscar", VaadinIcon.SEARCH.create(), event -> {
             results.removeAll();
             try {
                 List<UserDto> users = api.search(search.getValue() == null ? "" : search.getValue().trim());
@@ -240,26 +318,13 @@ public class ChatView extends ProtectedView {
                     if (session.getUser() != null && Objects.equals(user.id(), session.getUser().id())) {
                         continue;
                     }
-                    Button pick = new Button(display(user) + "  @" + user.username());
-                    pick.setWidthFull();
-                    pick.getStyle().set("justify-content", "flex-start");
-                    pick.addClickListener(click -> {
-                        try {
-                            ConversationDto conversation = api.startConversation(user.id());
-                            dialog.close();
-                            loadConversations();
-                            selectConversation(conversation.id());
-                        } catch (ApiException ex) {
-                            Notification.show(ex.getMessage());
-                        }
-                    });
-                    results.add(pick);
+                    results.add(userResult(user, dialog));
                 }
                 if (users.isEmpty()) {
                     results.add(new Span("Sin resultados"));
                 }
             } catch (ApiException ex) {
-                Notification.show(ex.getMessage());
+                Toast.show(ex.getMessage());
             }
         });
         find.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -275,9 +340,42 @@ public class ChatView extends ProtectedView {
         dialog.open();
     }
 
-    private String label(ConversationDto conversation) {
-        String name = display(conversation.otherUser());
-        return conversation.unreadCount() > 0 ? name + "  (" + conversation.unreadCount() + ")" : name;
+    private Div userResult(UserDto user, Dialog dialog) {
+        Span name = new Span(display(user));
+        name.addClassName("post-author");
+        Span handle = new Span("@" + user.username());
+        handle.addClassName("post-handle");
+        VerticalLayout info = new VerticalLayout(name, handle);
+        info.setPadding(false);
+        info.setSpacing(false);
+
+        Div card = new Div();
+        card.addClassName("user-card");
+        card.addClassName("chat-user-row");
+        card.add(AvatarUtil.of(user), info);
+        card.addClickListener(event -> {
+            try {
+                ConversationDto conversation = api.startConversation(user.id());
+                dialog.close();
+                loadConversations();
+                selectConversation(conversation.id());
+            } catch (ApiException ex) {
+                Toast.show(ex.getMessage());
+            }
+        });
+        return card;
+    }
+
+    private Div emptyState(String title, String subtitle) {
+        Div div = new Div();
+        div.addClassName("empty-state");
+        div.setWidthFull();
+        Span icon = new Span(VaadinIcon.COMMENTS.create());
+        icon.addClassName("empty-icon");
+        Span titleSpan = new Span(title);
+        titleSpan.addClassName("empty-state-title");
+        div.add(icon, titleSpan, new Span(subtitle));
+        return div;
     }
 
     private String display(UserDto user) {

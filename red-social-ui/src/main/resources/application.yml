@@ -11,7 +11,9 @@ app:
 
 vaadin:
   launch-browser: false
-  whitelisted-packages: com.redsocial.ui
+  allowed-packages: com.redsocial.ui
+  frontend:
+    hotdeploy: true
 
 logging:
   level:

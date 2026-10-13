@@ -4,6 +4,8 @@ import com.redsocial.api.security.UserPrincipal;
 import com.redsocial.api.service.ChatService;
 import com.redsocial.common.dto.MessageDto;
 import com.redsocial.common.dto.SendMessageRequest;
+import com.redsocial.common.dto.TypingEvent;
+import com.redsocial.common.dto.TypingRequest;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -29,8 +31,17 @@ public class ChatStompController {
         if (user == null) {
             return;
         }
-        MessageDto message = chatService.send(user.id(), request);
-        messagingTemplate.convertAndSend("/topic/conversations." + message.conversationId(), message);
+        chatService.send(user.id(), request);
+    }
+
+    @MessageMapping("/chat.typing")
+    public void typing(@Payload TypingRequest request, Principal principal) {
+        UserPrincipal user = resolve(principal);
+        if (user == null || request.conversationId() == null) {
+            return;
+        }
+        messagingTemplate.convertAndSend("/topic/conversations." + request.conversationId() + ".typing",
+                new TypingEvent(request.conversationId(), user.getUsername(), request.typing()));
     }
 
     private UserPrincipal resolve(Principal principal) {

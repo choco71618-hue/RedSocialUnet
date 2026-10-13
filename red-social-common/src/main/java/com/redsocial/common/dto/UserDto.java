@@ -9,6 +9,7 @@ public record UserDto(
         String displayName,
         String bio,
         String avatarUrl,
+        String coverUrl,
         boolean following,
         long followersCount,
         long followingCount,
