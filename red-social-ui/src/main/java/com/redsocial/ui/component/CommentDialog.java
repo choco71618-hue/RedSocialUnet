@@ -23,7 +23,6 @@ public class CommentDialog extends Dialog {
 
     public CommentDialog(PostDto post, ApiService api, UserSession session, Runnable onChanged) {
         setHeaderTitle("Comentarios");
-        setWidth("580px");
 
         VerticalLayout list = new VerticalLayout();
         list.setPadding(false);
@@ -31,7 +30,6 @@ public class CommentDialog extends Dialog {
 
         TextArea input = new TextArea();
         input.setPlaceholder("Escribí un comentario...");
-        input.setWidthFull();
         input.setMaxLength(1000);
 
         Button send = new Button("Enviar", event -> {
@@ -47,7 +45,6 @@ public class CommentDialog extends Dialog {
         send.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout composer = new HorizontalLayout(AvatarUtil.of(session.getUser()), input, send);
-        composer.setWidthFull();
         composer.setAlignItems(FlexComponent.Alignment.END);
         composer.setFlexGrow(1, input);
 
@@ -97,7 +94,6 @@ public class CommentDialog extends Dialog {
                 AvatarUtil.create(comment.authorDisplayName(), comment.authorUsername(), comment.authorAvatarUrl()),
                 text);
         row.addClassName("card");
-        row.setWidthFull();
         row.setAlignItems(FlexComponent.Alignment.START);
         return row;
     }

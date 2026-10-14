@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@Theme(themeClass = Lumo.class)
+@Theme("redsocial")
 @Push(transport = Transport.WEBSOCKET_XHR)
 public class RedSocialUiApplication implements AppShellConfigurator {
 

@@ -35,7 +35,6 @@ public class NotificationsBell extends Div {
 
         Button bell = new Button(VaadinIcon.BELL.create(), event -> open());
         bell.addClassNames("notifications-bell-button");
-        bell.setWidthFull();
 
         badge.addClassName("notifications-badge");
         badge.setVisible(false);
@@ -76,12 +75,10 @@ public class NotificationsBell extends Div {
     private void open() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Notificaciones");
-        dialog.setWidth("420px");
 
         VerticalLayout list = new VerticalLayout();
         list.setPadding(false);
         list.setSpacing(false);
-        list.setWidthFull();
         dialog.add(list);
 
         Button markAll = new Button("Marcar todas leídas", event -> {
@@ -124,7 +121,6 @@ public class NotificationsBell extends Div {
         Span t = new Span(title);
         t.addClassName("empty-title");
         div.add(t, new Span(subtitle));
-        div.setWidthFull();
         return div;
     }
 

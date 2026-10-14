@@ -83,7 +83,6 @@ public class ProjectsView extends ProtectedView {
 
     private Tabs buildTabs() {
         tabs.add(tabEvents, tabDonations, tabProjects);
-        tabs.setWidthFull();
         tabs.addClassName("projects-tabs");
         return tabs;
     }
@@ -201,7 +200,6 @@ public class ProjectsView extends ProtectedView {
         HorizontalLayout head = new HorizontalLayout(avatar, info);
         head.setPadding(false);
         head.setSpacing(true);
-        head.setWidthFull();
         head.setAlignItems(FlexComponent.Alignment.CENTER);
         head.addClassName("project-head");
         return head;
@@ -229,7 +227,6 @@ public class ProjectsView extends ProtectedView {
         VerticalLayout block = new VerticalLayout();
         block.setPadding(false);
         block.setSpacing(true);
-        block.setWidthFull();
 
         BigDecimal target = project.targetAmount() == null ? BigDecimal.ZERO : project.targetAmount();
         BigDecimal raised = project.raisedAmount() == null ? BigDecimal.ZERO : project.raisedAmount();
@@ -238,7 +235,6 @@ public class ProjectsView extends ProtectedView {
         double capped = Math.min(1.0, Math.max(0, percent));
 
         ProgressBar bar = new ProgressBar(0, 1, capped);
-        bar.setWidthFull();
         bar.addClassName("project-progress");
 
         Span counter = new Span(formatMoney(raised) + " de " + formatMoney(target)
@@ -250,7 +246,6 @@ public class ProjectsView extends ProtectedView {
         donate.addClassName("project-donate");
 
         HorizontalLayout bottom = new HorizontalLayout(counter, donate);
-        bottom.setWidthFull();
         bottom.setAlignItems(FlexComponent.Alignment.CENTER);
         bottom.setFlexGrow(1, counter);
 
@@ -261,14 +256,12 @@ public class ProjectsView extends ProtectedView {
     private void donateDialog(ProjectDto project) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Aportar a «" + project.title() + "»");
-        dialog.setWidth("400px");
 
         NumberField amount = new NumberField("Monto");
         amount.setPlaceholder("Ej: 5000");
         amount.setMin(0.01);
         amount.setValue(1000.0);
         amount.setPrefixComponent(VaadinIcon.MONEY.create());
-        amount.setWidthFull();
 
         Button confirm = new Button("Aportar", event -> {
             try {
@@ -307,24 +300,19 @@ public class ProjectsView extends ProtectedView {
     private void createEventDialog() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nuevo evento");
-        dialog.setWidth("540px");
 
         TextField title = new TextField("Título");
-        title.setWidthFull();
         title.setPlaceholder("Ej: Feria de Ciencias");
 
         TextArea description = new TextArea("Descripción");
-        description.setWidthFull();
         description.setMaxLength(4000);
         description.setPlaceholder("Contá de qué se trata el evento.");
 
         DateTimePicker eventDate = new DateTimePicker("Fecha y hora");
-        eventDate.setWidthFull();
         eventDate.setDatePlaceholder("dd/mm/aaaa");
         eventDate.setTimePlaceholder("hh:mm");
 
         TextField location = new TextField("Ubicación");
-        location.setWidthFull();
         location.setPlaceholder("Ej: Aula Magna, Edificio Central");
 
         VerticalLayout body = new VerticalLayout(title, description, eventDate, location);
@@ -345,19 +333,15 @@ public class ProjectsView extends ProtectedView {
     private void createDonationDialog() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva campaña de donación");
-        dialog.setWidth("540px");
 
         TextField title = new TextField("Título");
-        title.setWidthFull();
         title.setPlaceholder("Ej: Espacio de Impresión 3D");
 
         TextArea description = new TextArea("Descripción");
-        description.setWidthFull();
         description.setMaxLength(4000);
         description.setPlaceholder("Contá para qué espacio universitario es la campaña.");
 
         NumberField target = new NumberField("Meta de recaudación ($)");
-        target.setWidthFull();
         target.setMin(1);
         target.setPrefixComponent(VaadinIcon.MONEY.create());
 
@@ -379,14 +363,11 @@ public class ProjectsView extends ProtectedView {
     private void createProjectDialog() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nuevo proyecto");
-        dialog.setWidth("540px");
 
         TextField title = new TextField("Título");
-        title.setWidthFull();
         title.setPlaceholder("Ej: Wi-Fi académico gratuito");
 
         TextArea description = new TextArea("Descripción");
-        description.setWidthFull();
         description.setMaxLength(4000);
         description.setPlaceholder("Contá qué mejora proponés para la institución.");
 
@@ -395,7 +376,6 @@ public class ProjectsView extends ProtectedView {
         status.setItems(ProjectStatus.values());
         status.setItemLabelGenerator(ProjectsView::statusLabel);
         status.setValue(ProjectStatus.PROPOSED);
-        status.setWidthFull();
 
         VerticalLayout body = new VerticalLayout(title, description, status);
         body.setPadding(false);
@@ -460,7 +440,6 @@ public class ProjectsView extends ProtectedView {
             default -> "Sumá un proyecto para mejorar la institución.";
         });
         div.add(icon, title, subtitle);
-        div.setWidthFull();
         return div;
     }
 

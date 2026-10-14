@@ -1,0 +1,349 @@
+========================================================================
+ CONTEXTO DE ESTILIZACIÓN — LANDING PÚBLICA (HOME) DE RED-SOCIAL
+ Clon estático de https://www.authkit.com/  ·  Edificio C · UNET
+ Última actualización: 2026-10-13
+========================================================================
+
+ÍNDICE
+  0. Resumen
+  1. Cómo está montada (arquitectura de estilos)
+  2. Mapa de archivos
+  3. Hojas de estilo reales de authkit (hotlink)
+  4. overrides.css (lo único local de CSS)
+  5. Tipografías (fuentes)
+  6. Paleta y variables CSS reales
+  7. Estructura de secciones (markup)
+  8. Mecanismos especiales (hero, scroll, videos)
+  9. Cómo editar y ver cambios
+ 10. Responsive / breakpoints
+ 11. Colisiones y advertencias
+ 12. Verificación de fidelidad
+
+
+------------------------------------------------------------------------
+0. RESUMEN
+------------------------------------------------------------------------
+La home (ruta "/") es una réplica de la landing de authkit.com usando
+PURO CSS: se cargan TAL CUAL las dos hojas de estilo originales del sitio
+(hotlink) más un pequeño archivo local de overrides. El HTML es el markup
+SSR original de authkit, inyectado como innerHTML, con los textos
+reescritos y adaptados a "la red social del Edificio C".
+
+Principio clave: NO reescribimos el CSS de authkit. Se usa su CSS real y
+solo se "parchea" lo imprescindible (fuentes locales, scroll y estado
+inicial de animaciones) desde overrides.css.
+
+Ámbito: los estilos de authkit se cargan SOLO mientras la vista LandingView
+está activa. Al navegar a /login, /home, etc., Vaadin quita esas hojas y la
+app recupera su aspecto normal (sin fugas).
+
+
+------------------------------------------------------------------------
+1. CÓMO ESTÁ MONTADA (arquitectura de estilos)
+------------------------------------------------------------------------
+Vista Java:  red-social-ui/src/main/java/com/redsocial/ui/view/LandingView.java
+
+  @Route("")                       -> es la home pública
+  @StyleSheet(...) x2 (hotlink)    -> CSS real de authkit
+  @StyleSheet("context://authkit/overrides.css") -> parches locales
+  getElement().setProperty("innerHTML", <contenido de landing.html>)
+
+Flujo:
+  1) Vaadin enlaza las 3 hojas de estilo solo en la ruta "/".
+  2) LandingView lee landing.html (ClassPathResource) y lo inyecta como
+     innerHTML dentro de un <div class="ak-host">.
+  3) El navegador aplica el CSS real de authkit sobre ese markup -> queda
+     idéntico al original (verificado por estilos computados).
+
+Orden de carga de CSS (importa): variables/resets -> componentes -> overrides.
+
+
+------------------------------------------------------------------------
+2. MAPA DE ARCHIVOS
+------------------------------------------------------------------------
+Fuente (editable, NO autogenerada):
+  red-social-ui/src/main/resources/static/authkit/
+    landing.html      -> markup clon (formateado con Prettier, ~1672 líneas)
+    overrides.css     -> hoja local de parches (~90 líneas)
+    fonts/            -> 7 fuentes reales descargadas
+      untitled-sans-regular-v2.woff2
+      untitled-sans-medium-v2.woff2
+      ibm-plex-mono-text.woff2
+      ibm-plex-mono-text-italic.woff2
+      ibm-plex-mono-semibold.woff2
+      aeonik-pro-medium.woff2
+      dot-digital.ttf
+
+Salida de build (NO editar; Maven la regenera copiando la fuente):
+  red-social-ui/target/classes/static/authkit/ (mismos archivos)
+
+Los archivos fuente en src/main/resources se copian a target/classes con
+"process-resources" en cada build / "spring-boot:run". En runtime la app lee
+la copia de target/classes.
+
+
+------------------------------------------------------------------------
+3. HOJAS DE ESTILO REALES DE AUTHKIT (HOTLINK)
+------------------------------------------------------------------------
+Se cargan desde el propio sitio (no se descargan):
+
+  A) https://www.authkit.com/_next/static/chunks/0l0q6~h79kzc..css   (~3.4 KB)
+     Contiene:
+       - :root con las variables de color (--dark-background, --blue-*,
+         --gradient-*)  [ver sección 6]
+       - @font-face de Untitled Sans e IBM Plex Mono (apuntan a
+         cdn.workos.com)
+       - Resets globales: body{color:#fff;background:var(--dark-background);
+         overflow-y:hidden;font-family:Untitled Sans,...}
+         html,body{position:relative;overflow-x:hidden}
+         *{box-sizing:border-box} a{color:inherit;text-decoration:none}
+         img{object-fit:cover;pointer-events:none} etc.
+       - .container-lg{max-width:1200px}
+
+  B) https://www.authkit.com/_next/static/chunks/0kn7kgyjdnxlm.css   (~83 KB)
+     El grueso: componentes por sección con clases tipo "módulo" hasheadas
+     (ej. page-module___8aEwW__page, glowing-button-module__G7fw6a__button)
+     y clases semánticas de layout (.hero, .hero__header, .hero__cards,
+     .features-slider, .dashboard, .customui, .radix, .security, .complete,
+     .cta, .page-module___8aEwW__page-separator, etc.).
+
+NOTA: las @font-face de aeonikPro y dotDigital viven en el chunk de
+variables y apuntan a /_next/static/media/... (se resuelven contra
+authkit.com). Como esas fuentes son cross-origin, el navegador las BLOQUEA
+por CORS -> por eso las declaramos localmente (sección 5).
+
+
+------------------------------------------------------------------------
+4. overrides.css (LO ÚNICO LOCAL DE CSS)
+------------------------------------------------------------------------
+Ubicación: static/authkit/overrides.css   (se carga vía context://)
+Se carga DESPUÉS del CSS real, así que gana donde haga falta.
+
+Contenido y propósito:
+
+  4.1 Fuentes locales (mismos nombres de familia que authkit):
+      @font-face "Untitled Sans"  400 y 700  -> woff2 locales
+      @font-face "IBM Plex Mono"  400, 400 italic, 700 -> woff2 locales
+      @font-face "aeonikPro"      SIN font-weight (igual que el original) -> local
+      @font-face "dotDigital"     normal -> local (.ttf)
+      => Se redeclaran para que el navegador use el archivo local en vez del
+         remoto bloqueado por CORS. Se respeta "font-display: swap".
+
+  4.2 Scroll y altura (igualar el comportamiento del sitio real):
+      html, body { overflow-y: auto !important; height: auto !important;
+                   line-height: normal !important; }
+      #outlet { height: auto !important; }
+      Motivo: la app (Lumo/tema) fuerza height:100% en html/body y
+      #outlet:100vh, y hereda line-height 26px, lo que recortaba/alteraba la
+      landing. En authkit el body crece con el contenido y el scroll es del
+      documento, con line-height normal.
+
+  4.3 Revelar elementos que en authkit anima JavaScript:
+      .hero__cards [data-card-left],
+      .hero__cards [data-card-center],
+      .hero__cards [data-card-right],
+      .radix-logo-blender {
+          opacity: 1 !important;
+          transform: none !important;
+      }
+      Motivo: esas tarjetas traen opacity:0 + transform INLINE (estado
+      inicial de framer-motion). El inline gana sobre el CSS, así que se
+      necesita !important para mostrarlas en el clon estático.
+
+  4.4 .ak-host { width: 100%; }  (contenedor de la vista)
+
+
+------------------------------------------------------------------------
+5. TIPOGRAFÍAS (FUENTES)
+------------------------------------------------------------------------
+Familias usadas por el diseño (del CSS real):
+  - Untitled Sans     -> texto de cuerpo (body). Pesos 400 y 700.
+  - aeonikPro         -> títulos/headings (var --font-aeonik-pro).
+  - IBM Plex Mono     -> detalles monoespaciados (código/etiquetas).
+  - dotDigital        -> displays numéricos (keypads/anillos animados).
+
+Por qué locales: authkit.com y cdn.workos.com NO envían
+"Access-Control-Allow-Origin", así que un woff2 cross-origin lo bloquea el
+navegador (los @font-face remotos fallan). Se descargaron a fonts/ y se
+redeclararon en overrides.css.
+
+Si querés cambiar/ajustar una fuente: reemplazá el archivo en fonts/ y
+actualizá el @font-face correspondiente en overrides.css.
+(La app principal sigue usando 'Plus Jakarta Sans' globalmente; eso no
+afecta a la landing porque el body de authkit define Untitled Sans.)
+
+
+------------------------------------------------------------------------
+6. PALETA Y VARIABLES CSS REALES
+------------------------------------------------------------------------
+Definidas en el chunk de variables (:root) de authkit:
+
+  --dark-background: #05060f;              (fondo general, casi negro azulado)
+  --body-normal:     #c8d4eac7;            (texto normal, con alfa)
+  --body-loud:       #c7d3ea;              (texto protagonista)
+  --body-muted:      #c7d3eaa3;            (texto secundario)
+  --gradient-loud-100: linear-gradient(0deg,#d8ecf8 0%,#98c0ef 100%);
+  --gradient-background-6: linear-gradient(0deg,#d8ecf80f 0%,#98c0ef0f 100%);
+  --gradient-subdued-12:   linear-gradient(0deg,#d8ecf81f 0%,#98c0ef1f 100%);
+  --blue-loud: #232425;
+  --blue-6:    #bad6f70f;   --blue-12: #bad7f71f;
+  --blue-24:   #bad6f73d;   --blue-90: #bad6f7e6;
+
+Valores recurrentes (inline/CSS) de referencia:
+  - Texto con degradado (títulos): background linear-gradient(0deg,#d8ecf8,
+    #98c0ef) + -webkit-background-clip:text; (clase .text-gradient).
+  - Bordes/fills azulados: rgba(186,214,247, .12 / .24).
+  - Botón "glow": borde cónico animado + halo (clases
+    .glowing-button-module__G7fw6a__*).
+  - Sombras/halos azules: rgba(75,113,250,...), rgba(21,61,204,...).
+  - Colores de marca en las tarjetas del hero (inline --ak-brand / --brand-color):
+    #EF6643 (naranja), #000 (negro), #663AF3 (violeta), #E46D4C, #027DEA, #269684.
+
+Cómo se cambia el acento: editando el marcado (inline styles) o agregando
+una regla en overrides.css que pise la variable/clase correspondiente.
+
+
+------------------------------------------------------------------------
+7. ESTRUCTURA DE SECCIONES (MARKUP)
+------------------------------------------------------------------------
+Raíz:  <main class="page-module___8aEwW__page">
+
+Hijos de primer nivel, en orden:
+  1) .hero                     (1ª sección — VACÍA a propósito; ver sección 8)
+  2) .features-slider          (6 íconos + etiquetas)
+  3) .dashboard                (ilustración + texto)
+  4) .customui                 (ilustración tipo editor + texto)
+  5) .page-module___8aEwW__page-separator   (hairline de 1px)
+  6) .radix                    (ilustración "blender" + texto + botón)
+  7) .page-module___8aEwW__page-separator
+  8) .security                 (tarjetas de seguridad + texto)
+  9) .page-module___8aEwW__page-separator
+ 10) .complete                 (texto + badges + botón)
+ 11) .page-module___8aEwW__page-separator
+ 12) .cta                      (título + 2 tarjetas + follow)
+
+(La sección .testimonials fue ELIMINADA respecto del original.)
+
+Contenido actual (Edificio C), resumido:
+  - features : Publicaciones · Perfiles · Seguir · Chat · Proyectos · Eventos
+  - dashboard: "Todo el C, en un solo lugar" / "Tu comunidad. Tus proyectos."
+  - customui : "Tu identidad" / "Tu perfil. A tu manera."
+  - radix    : "Hecho en Java" / "Java de punta a punta." / "Spring Boot + Vaadin."
+  - security : "Seguro por diseño" / tarjetas JWT, roles, contraseñas, moderación, presencia
+  - complete : "Pensado para crecer" / "Donde venimos a construir y conectar."
+  - cta      : "Sumate al C." / Creá tu cuenta (/register) / Mirá el código (GitHub)
+
+El hero (1) es un espacio reservado: conserva el fondo decorativo y la barra
+superior (header), pero su contenido está listo para que lo llenes.
+
+
+------------------------------------------------------------------------
+8. MECANISMOS ESPECIALES (HERO, SCROLL, VIDEOS)
+------------------------------------------------------------------------
+8.1 Revelado del hero (clase hero--intro)
+    En authkit, JavaScript agrega la clase "hero--intro" a <div class="hero">
+    y entonces el CSS aplica:
+        .hero--intro > *              { opacity:1; transform:none }
+        .hero--intro .hero__headline *{ opacity:1; transform:translateY(0) }
+        .hero--intro .hero__logo img  { opacity:1 }
+    En el clon estático, la clase YA viene puesta en el markup:
+        <div class="hero hero--intro"> ... </div>
+    (Si la quitaras, todo el hero quedaría en opacity:0 = invisible.)
+
+8.2 Hero vacío
+    El contenido central del hero se removió dejando:
+        <canvas>  +  .hero__spotlights  +  .hero__lines  +  <header class="hero__header">
+        +  dos <span class="hero__cross">  +  comentario <!-- hero: contenido a definir -->
+    El hero conserva su ALTURA por CSS (~1222px) aunque esté vacío.
+    El header conserva: marca "WorkOS" (link a workos.com), ícono GitHub
+    (-> repo) y botón "Get started" (-> /register).
+
+8.3 Scroll
+    El CSS real pone body{overflow-y:hidden}. overrides.css lo reactiva
+    (ver 4.2). El scroll lo hace el documento (html/body), no la vista.
+
+8.4 Fondo del hero (canvas/spotlights/líneas)
+    .hero__lines y .hero__spotlights son decorativos 100% CSS (visibles).
+    El <canvas> era una animación por JS -> queda vacío (transparente).
+    Los <canvas> de dashboard/security también quedan vacíos sin JS.
+
+8.5 Videos eliminados
+    El <video class="hero__video"> con sus <source> (.mov/.webm) fue
+    eliminado del markup. No hay videos.
+
+
+------------------------------------------------------------------------
+9. CÓMO EDITAR Y VER CAMBIOS
+------------------------------------------------------------------------
+- Editá SIEMPRE el archivo fuente:
+      red-social-ui/src/main/resources/static/authkit/landing.html
+  (y overrides.css / fonts/ si aplica). NO edites target/classes.
+
+- landing.html NO se genera: es un recurso estático. Maven solo lo copia a
+  target/classes. Para que el cambio se sirva:
+      ./mvnw -pl red-social-ui process-resources     # re-copia
+      # o reiniciar:
+      ./mvnw -pl red-social-ui -DskipTests spring-boot:run
+  Luego recargá el navegador con Ctrl+F5.
+
+- La app lee landing.html al construir la vista (en cada navegación a "/"),
+  así que tras re-copiar, un reload del navegador ya toma el nuevo archivo.
+
+- Si reescribís el HTML, evité reformateadores que rompan el anidamiento.
+  Formateador recomendado (seguro, respeta inline/block):
+      npx -y prettier@3 --parser html --print-width 140 \
+        --html-whitespace-sensitivity css --write landing.html
+
+- Textos: se editan directo en landing.html (nodos de texto). Los enlaces
+  a la app usan href="/register"; los de GitHub, el repo real
+  (github.com/choco71618-hue/RedSocialUnet).
+
+
+------------------------------------------------------------------------
+10. RESPONSIVE / BREAKPOINTS
+------------------------------------------------------------------------
+Los breakpoints vienen del CSS real de authkit (media queries dentro del
+chunk de 83 KB). Referencias detectadas: 640px, 940px, 1000px, 1200px.
+Ej: el título de .radix tiene versión "desktop" (.section-header-title-desktop)
+y "mobile" (.section-header-title-mobile) con distinto corte de líneas.
+El header de authkit oculta el ícono de GitHub por debajo de ~940px.
+No hay CSS responsive propio en overrides.css salvo el comportamiento de
+scroll; se delega todo al CSS real.
+
+
+------------------------------------------------------------------------
+11. COLISIONES Y ADVERTENCIAS
+------------------------------------------------------------------------
+- El CSS real de authkit incluye selectores GLOBALES (.card, .section, .link,
+  .hero, .badge, y resets de body/a/img). Por eso se carga SOLO en la ruta
+  "/" (a nivel vista). Al salir de la landing, Vaadin descarga esas hojas y
+  la app no se ve afectada. Verificado: /register no incluye el CSS de authkit.
+- El <body> toma temporalmente color/fondo de authkit en la landing
+  (background #05060f), y vuelve a la normalidad al navegar.
+- Ilustraciones internas siguen siendo de authkit: la mock de login dentro
+  de .customui ("Sign in to SuperApp", "Colour / Logo icon / Radius") y los
+  gráficos de dashboard/security/radix. Se dejaron por ahora.
+- Los íconos de las 6 features son PNGs de authkit (llavero, escudo, etc.):
+  pueden no coincidir visualmente con las etiquetas nuevas.
+- La marca del header dice "WorkOS" (link a workos.com): branding heredado.
+
+
+------------------------------------------------------------------------
+12. VERIFICACIÓN DE FIDELIDAD
+------------------------------------------------------------------------
+Método usado: Chrome headless vía puppeteer comparando getComputedStyle del
+clon contra https://www.authkit.com/ en el mismo viewport (1440x900).
+Resultado: body, .hero, .hero__header, .dashboard, .customui, .radix,
+.security, .complete, .cta y .text-gradient => IDÉNTICOS.
+Única diferencia: .features-slider arranca en opacity:0 en el original
+(lo anima JS); el clon lo muestra (opacity 1). Correcto para un clon estático.
+
+Chequeos rápidos (por si querés verificar tras editar):
+  - Estilos computados: comparar propiedades clave (fontFamily, fontSize,
+    color, backgroundColor, backgroundImage, padding, height, display).
+  - Recursos: /authkit/overrides.css, /authkit/landing.html y
+    /authkit/fonts/* deben responder 200 desde la UI (:8081).
+
+========================================================================
+ FIN DEL DOCUMENTO
+========================================================================

@@ -38,7 +38,6 @@ public class LoginView extends HorizontalLayout implements BeforeEnterObserver {
         addClassName("auth-split");
         setPadding(false);
         setSpacing(false);
-        setSizeFull();
 
         VerticalLayout hero = hero();
         VerticalLayout panel = panel();
@@ -85,17 +84,13 @@ LottieView ocean = new LottieView("/animations/ocean.json");
         title.addClassName("auth-card-title");
 
         TextField username = new TextField("Usuario o email");
-        username.setWidthFull();
         PasswordField password = new PasswordField("Contraseña");
-        password.setWidthFull();
 
         Button login = new Button("Ingresar", event -> doLogin(username.getValue(), password.getValue()));
         login.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        login.setWidthFull();
 
         Button goRegister = new Button("Crear una cuenta", event -> UI.getCurrent().navigate(RegisterView.class));
         goRegister.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        goRegister.setWidthFull();
 
         card.add(title, username, password, login, goRegister);
         panel.add(card);
@@ -106,7 +101,7 @@ LottieView ocean = new LottieView("/animations/ocean.json");
         try {
             AuthResponse response = api.login(new LoginRequest(identifier, secret));
             session.setAuth(response);
-            UI.getCurrent().navigate("");
+            UI.getCurrent().navigate("home");
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());
         }
@@ -115,7 +110,7 @@ LottieView ocean = new LottieView("/animations/ocean.json");
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (session.isLoggedIn()) {
-            event.forwardTo("");
+            event.forwardTo("home");
         }
     }
 }

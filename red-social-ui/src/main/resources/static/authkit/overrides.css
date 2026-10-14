@@ -1,0 +1,85 @@
+/* ============================================================
+   AuthKit replica — overrides locales
+   Se carga DESPUÉS del CSS real de authkit.com.
+   1) @font-face apuntando a las fuentes locales (las remotas
+      son bloqueadas por CORS porque no envían ACAO).
+   2) Habilitar scroll vertical (el CSS real pone overflow-y:hidden).
+   ============================================================ */
+
+/* --- Fuentes reales, servidas localmente --- */
+@font-face {
+    font-family: "Untitled Sans";
+    src: url("fonts/untitled-sans-regular-v2.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Untitled Sans";
+    src: url("fonts/untitled-sans-medium-v2.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/ibm-plex-mono-text.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/ibm-plex-mono-text-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/ibm-plex-mono-semibold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "aeonikPro";
+    src: url("fonts/aeonik-pro-medium.woff2") format("woff2");
+    font-display: swap;
+}
+@font-face {
+    font-family: "dotDigital";
+    src: url("fonts/dot-digital.ttf") format("truetype");
+    font-display: swap;
+}
+
+/* --- Igualar el comportamiento del sitio real ---
+   La app fuerza height:100% en html/body y #outlet:100vh (Lumo),
+   lo que hace que el body sea el scroller y herede line-height 26px.
+   En authkit el body crece con el contenido y el scroll es del
+   documento, con line-height normal. Lo restauramos. --- */
+html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+    line-height: normal !important;
+}
+
+#outlet {
+    height: auto !important;
+}
+
+/* El contenedor de la vista no debe recortar el contenido de la landing */
+.ak-host {
+    width: 100%;
+}
+
+/* --- Sin JS: revelar elementos cuyo estado inicial (opacity:0 + transform)
+   era animado por JavaScript en el sitio original. En un clon estático
+   quedarían invisibles, así que los mostramos en su estado final. --- */
+.hero__cards [data-card-left],
+.hero__cards [data-card-center],
+.hero__cards [data-card-right],
+.radix-logo-blender {
+    opacity: 1 !important;
+    transform: none !important;
+}

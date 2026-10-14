@@ -37,14 +37,12 @@ public class ExploreView extends ProtectedView {
         this.api = api;
 
         search.setPlaceholder("Buscar usuarios por nombre o @usuario...");
-        search.setWidthFull();
         search.setClearButtonVisible(true);
 
         Button searchButton = new Button("Buscar", VaadinIcon.SEARCH.create(), event -> doSearch());
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(search, searchButton);
-        bar.setWidthFull();
         bar.setAlignItems(FlexComponent.Alignment.END);
         bar.setFlexGrow(1, search);
 

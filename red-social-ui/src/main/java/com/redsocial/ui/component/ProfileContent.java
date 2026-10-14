@@ -70,7 +70,6 @@ public class ProfileContent extends VerticalLayout {
         com.vaadin.flow.component.tabs.Tab tabEvents = new com.vaadin.flow.component.tabs.Tab("Eventos");
         com.vaadin.flow.component.tabs.Tabs tabs = new com.vaadin.flow.component.tabs.Tabs(tabPosts, tabProjects, tabEvents);
         tabs.addClassName("profile-tabs");
-        tabs.setWidthFull();
 
         tabs.addSelectedChangeListener(event -> {
             body.removeAll();
@@ -244,20 +243,16 @@ public class ProfileContent extends VerticalLayout {
     private void openEdit(UserDto user) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Editar perfil");
-        dialog.setWidth("560px");
 
         TextField displayName = new TextField("Nombre");
         displayName.setValue(user.displayName() == null ? "" : user.displayName());
-        displayName.setWidthFull();
 
         TextArea bio = new TextArea("Biografía");
         bio.setValue(user.bio() == null ? "" : user.bio());
-        bio.setWidthFull();
         bio.setMaxLength(500);
 
         TextField avatarUrl = new TextField("URL del avatar (o subí una imagen)");
         avatarUrl.setValue(user.avatarUrl() == null ? "" : user.avatarUrl());
-        avatarUrl.setWidthFull();
 
         MemoryBuffer avatarBuffer = new MemoryBuffer();
         Upload avatarUpload = new Upload(avatarBuffer);
@@ -279,7 +274,6 @@ public class ProfileContent extends VerticalLayout {
 
         TextField coverUrl = new TextField("URL del cover");
         coverUrl.setValue(user.coverUrl() == null ? "" : user.coverUrl());
-        coverUrl.setWidthFull();
 
         MemoryBuffer coverBuffer = new MemoryBuffer();
         Upload coverUpload = new Upload(coverBuffer);

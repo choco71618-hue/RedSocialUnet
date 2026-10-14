@@ -63,17 +63,14 @@ public class ChatView extends ProtectedView {
         this.api = api;
         this.bridge = bridge;
 
-        setSizeFull();
         setPadding(false);
         setSpacing(false);
 
         conversationList.setPadding(false);
         conversationList.setSpacing(false);
-        conversationList.setWidthFull();
 
         Button newConversation = new Button("Nueva conversación", VaadinIcon.PLUS.create(),
                 event -> openNewConversation());
-        newConversation.setWidthFull();
         newConversation.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 
         Span eyebrow = new Span("MENSAJES");
@@ -88,13 +85,11 @@ public class ChatView extends ProtectedView {
         thread.addClassName("message-thread");
         thread.setPadding(false);
         thread.setSpacing(false);
-        thread.setWidthFull();
 
         typing.addClassName("typing-indicator");
         typing.setVisible(false);
 
         input.setPlaceholder("Escribí un mensaje...");
-        input.setWidthFull();
         input.setMaxLength(2000);
         input.addValueChangeListener(event -> {
             if (currentConversationId != null) {
@@ -107,19 +102,16 @@ public class ChatView extends ProtectedView {
 
         HorizontalLayout composer = new HorizontalLayout(input, send);
         composer.addClassName("chat-composer");
-        composer.setWidthFull();
         composer.setAlignItems(FlexComponent.Alignment.END);
         composer.setFlexGrow(1, input);
 
         VerticalLayout threadPane = new VerticalLayout(thread, typing, composer);
         threadPane.setPadding(false);
         threadPane.setSpacing(false);
-        threadPane.setSizeFull();
         threadPane.setFlexGrow(1, thread);
 
         HorizontalLayout shell = new HorizontalLayout(leftPane, threadPane);
         shell.addClassName("chat-shell");
-        shell.setSizeFull();
         shell.setPadding(false);
         shell.setSpacing(false);
         shell.setFlexGrow(1, threadPane);
@@ -301,11 +293,9 @@ public class ChatView extends ProtectedView {
     private void openNewConversation() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva conversación");
-        dialog.setWidth("480px");
 
         TextField search = new TextField();
         search.setPlaceholder("Buscar usuario...");
-        search.setWidthFull();
 
         VerticalLayout results = new VerticalLayout();
         results.setPadding(false);
@@ -330,7 +320,6 @@ public class ChatView extends ProtectedView {
         find.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(search, find);
-        bar.setWidthFull();
         bar.setAlignItems(FlexComponent.Alignment.END);
         bar.setFlexGrow(1, search);
 
@@ -369,7 +358,6 @@ public class ChatView extends ProtectedView {
     private Div emptyState(String title, String subtitle) {
         Div div = new Div();
         div.addClassName("empty-state");
-        div.setWidthFull();
         Span icon = new Span(VaadinIcon.COMMENTS.create());
         icon.addClassName("empty-icon");
         Span titleSpan = new Span(title);

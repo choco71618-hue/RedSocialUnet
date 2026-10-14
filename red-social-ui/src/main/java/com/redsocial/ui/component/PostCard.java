@@ -62,7 +62,6 @@ public class PostCard extends VerticalLayout {
         meta.setAlignItems(FlexComponent.Alignment.CENTER);
 
         HorizontalLayout header = new HorizontalLayout(avatar, meta);
-        header.setWidthFull();
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         return header;
     }
@@ -79,7 +78,6 @@ public class PostCard extends VerticalLayout {
         if (post.mediaUrl() != null && !post.mediaUrl().isBlank()) {
             com.vaadin.flow.component.html.Image image = new com.vaadin.flow.component.html.Image(post.mediaUrl(), "imagen");
             image.addClassName("post-media");
-            image.setWidthFull();
             image.getElement().setProperty("data-loaded", "false");
             image.getElement().addEventListener("load", e ->
                     image.getElement().setProperty("data-loaded", "true"));
@@ -95,8 +93,6 @@ public class PostCard extends VerticalLayout {
         var img = new com.vaadin.flow.component.html.Image(src, "imagen completa");
         img.addClassName("lightbox-img");
         dialog.add(img);
-        dialog.setWidth("auto");
-        dialog.setHeight("auto");
         dialog.setCloseOnOutsideClick(true);
         dialog.open();
     }

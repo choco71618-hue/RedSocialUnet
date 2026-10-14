@@ -83,9 +83,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     }
 
     private HorizontalLayout buildNavbar(ApiService api) {
-        Span brand = new Span("RED-SOCIAL");
-        brand.addClassName("app-brand");
-
         com.vaadin.flow.component.textfield.TextField search = new com.vaadin.flow.component.textfield.TextField();
         search.setPlaceholder("Buscar en el C…");
         search.setClearButtonVisible(true);
@@ -95,7 +92,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
                 UI.getCurrent().navigate("explore?q=" + (search.getValue() == null ? "" : search.getValue().trim())));
 
         Button post = new Button("Publicar", VaadinIcon.PAPERPLANE.create(),
-                event -> UI.getCurrent().navigate(""));
+                event -> UI.getCurrent().navigate("home"));
         post.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         post.addClassName("app-post-button");
 
@@ -105,11 +102,29 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         actions.setSpacing(false);
         actions.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        HorizontalLayout navbar = new HorizontalLayout(brand, actions);
+        HorizontalLayout navbar = new HorizontalLayout(actions);
         navbar.addClassName("app-navbar");
-        navbar.setWidthFull();
         navbar.setAlignItems(FlexComponent.Alignment.CENTER);
         return navbar;
+    }
+
+    private HorizontalLayout brand() {
+        Span mark = new Span("C");
+        mark.addClassName("app-brand-mark");
+        Span name = new Span("RED-SOCIAL");
+        name.addClassName("app-brand-name");
+        Span sub = new Span("Edificio C · UNET");
+        sub.addClassName("app-brand-sub");
+        VerticalLayout text = new VerticalLayout(name, sub);
+        text.setPadding(false);
+        text.setSpacing(false);
+        text.addClassName("app-brand-text");
+        HorizontalLayout brand = new HorizontalLayout(mark, text);
+        brand.addClassName("app-brand");
+        brand.setPadding(false);
+        brand.setSpacing(false);
+        brand.setAlignItems(FlexComponent.Alignment.CENTER);
+        return brand;
     }
 
     private com.vaadin.flow.component.html.Span userChip() {
@@ -132,10 +147,12 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         sidebar.addClassName("app-sidebar");
         sidebar.setPadding(false);
         sidebar.setSpacing(false);
-        sidebar.setSizeFull();
+
+        HorizontalLayout brand = brand();
+        brand.addClassName("app-brand-box");
 
         VerticalLayout nav = new VerticalLayout(
-                navItem("", VaadinIcon.HOME, "Inicio"),
+                navItem("home", VaadinIcon.HOME, "Inicio"),
                 navItem("explore", VaadinIcon.SEARCH, "Explorar"),
                 navItem("projects", VaadinIcon.ROCKET, "Proyectos"),
                 navItem("chat", VaadinIcon.COMMENTS, "Chat"),
@@ -150,7 +167,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         Span spacer = new Span();
         spacer.addClassName("app-spacer");
 
-        sidebar.add(nav, bell, spacer, buildUserBox(session));
+        sidebar.add(brand, nav, bell, spacer, buildUserBox(session));
         return sidebar;
     }
 
@@ -159,7 +176,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         iconComponent.addClassName("app-nav-icon");
         Button button = new Button(text, iconComponent, event -> UI.getCurrent().navigate(route));
         button.addClassName("app-nav-item");
-        button.setWidthFull();
         navItems.put(route, button);
         return button;
     }
@@ -194,7 +210,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
             UI.getCurrent().navigate(LoginView.class);
         });
         logout.addClassName("app-logout");
-        logout.setWidthFull();
         box.add(logout);
         return box;
     }

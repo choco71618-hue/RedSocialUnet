@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-@Route(value = "", layout = MainLayout.class)
+@Route(value = "home", layout = MainLayout.class)
 @PageTitle("Inicio | RED-SOCIAL")
 public class FeedView extends ProtectedView {
 
@@ -60,9 +60,7 @@ public class FeedView extends ProtectedView {
         this.session = session;
 
         composer.setPlaceholder("¿Qué está pasando en el C?");
-        composer.setWidthFull();
         composer.setMaxLength(2000);
-        composer.setMinHeight("84px");
         composer.addValueChangeListener(event -> {
             int len = composer.getValue() == null ? 0 : composer.getValue().length();
             count.setText(len > 0 ? String.valueOf(len) + "/2000" : "");
@@ -81,25 +79,21 @@ public class FeedView extends ProtectedView {
         count.addClassName("composer-count");
 
         HorizontalLayout toolbar = new HorizontalLayout(upload, removePreview, count);
-        toolbar.setWidthFull();
         toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
         toolbar.setPadding(false);
         toolbar.setFlexGrow(1, count);
 
         HorizontalLayout editorRow = new HorizontalLayout(composer, publish);
-        editorRow.setWidthFull();
         editorRow.setAlignItems(FlexComponent.Alignment.END);
         editorRow.setFlexGrow(1, composer);
 
         VerticalLayout editor = new VerticalLayout(editorRow, preview, toolbar);
         editor.setPadding(false);
         editor.setSpacing(true);
-        editor.setWidthFull();
 
         Avatar avatar = AvatarUtil.of(session.getUser());
         HorizontalLayout composerCard = new HorizontalLayout(avatar, editor);
         composerCard.addClassName("composer");
-        composerCard.setWidthFull();
         composerCard.setAlignItems(FlexComponent.Alignment.START);
         composerCard.setFlexGrow(1, editor);
 
@@ -110,7 +104,6 @@ public class FeedView extends ProtectedView {
         main.setPadding(false);
         main.setSpacing(false);
         main.addClassName("layout-main");
-        main.setWidthFull();
 
         rail.addClassName("layout-rail");
         rail.setPadding(false);
@@ -118,7 +111,6 @@ public class FeedView extends ProtectedView {
 
         Div layout = new Div(main, rail);
         layout.addClassName("layout-with-rail");
-        layout.setWidthFull();
         add(layout);
     }
 
@@ -231,7 +223,6 @@ public class FeedView extends ProtectedView {
         VerticalLayout card = new VerticalLayout();
         card.setPadding(false);
         card.setSpacing(false);
-        card.setWidthFull();
 
         Span title = new Span("Próximos eventos del C");
         title.addClassName("rail-title");
@@ -265,7 +256,6 @@ public class FeedView extends ProtectedView {
         VerticalLayout card = new VerticalLayout();
         card.setPadding(false);
         card.setSpacing(false);
-        card.setWidthFull();
 
         Span title = new Span("A quién seguir");
         title.addClassName("rail-title");

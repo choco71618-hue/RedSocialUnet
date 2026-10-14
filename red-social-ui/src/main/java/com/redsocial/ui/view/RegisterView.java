@@ -38,7 +38,6 @@ public class RegisterView extends HorizontalLayout implements BeforeEnterObserve
         addClassName("auth-split");
         setPadding(false);
         setSpacing(false);
-        setSizeFull();
 
         VerticalLayout hero = hero();
         VerticalLayout panel = panel();
@@ -85,23 +84,17 @@ LottieView ocean = new LottieView("/animations/ocean.json");
         title.addClassName("auth-card-title");
 
         TextField displayName = new TextField("Nombre");
-        displayName.setWidthFull();
         TextField username = new TextField("Usuario");
-        username.setWidthFull();
         TextField email = new TextField("Email");
-        email.setWidthFull();
         PasswordField password = new PasswordField("Contraseña");
-        password.setWidthFull();
         password.setHelperText("Mínimo 8 caracteres");
 
         Button register = new Button("Registrarme", event -> doRegister(
                 displayName.getValue(), username.getValue(), email.getValue(), password.getValue()));
         register.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        register.setWidthFull();
 
         Button goLogin = new Button("Ya tengo cuenta", event -> UI.getCurrent().navigate(LoginView.class));
         goLogin.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        goLogin.setWidthFull();
 
         card.add(title, displayName, username, email, password, register, goLogin);
         panel.add(card);
@@ -112,7 +105,7 @@ LottieView ocean = new LottieView("/animations/ocean.json");
         try {
             AuthResponse response = api.register(new RegisterRequest(username, email, password, displayName));
             session.setAuth(response);
-            UI.getCurrent().navigate("");
+            UI.getCurrent().navigate("home");
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());
         }
@@ -121,7 +114,7 @@ LottieView ocean = new LottieView("/animations/ocean.json");
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (session.isLoggedIn()) {
-            event.forwardTo("");
+            event.forwardTo("home");
         }
     }
 }
