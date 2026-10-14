@@ -53,7 +53,7 @@ html {
     --rs-pill: 999px;
     --rs-ease: cubic-bezier(0.28, 0.7, 0.25, 1);
     --rs-gutter: 20px;
-    --rs-col: 720px;
+    --rs-col: 1024px;
     --rs-rail: 320px;
 
     --rs-gradient: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
@@ -315,7 +315,7 @@ body::before {
 .page-container {
     max-width: var(--rs-col);
     margin: 0 auto;
-    padding: 80px 0 96px;
+    padding: 80px 24px 96px;
     width: 100%;
     box-sizing: border-box;
     min-height: 100vh;
@@ -610,10 +610,10 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
    ============================================================ */
 
 .profile-cover {
-    height: 180px;
+    height: 80px;
     position: relative;
     margin-bottom: 62px;
-    border: 1px solid var(--rs-hairline);
+    /* border: 1px solid var(--rs-hairline); */
     border-radius: var(--rs-radius-m);
     overflow: visible;
     background: radial-gradient(120% 140% at 50% 0%, rgba(152, 192, 239, 0.18) 0%, rgba(5, 6, 15, 0) 70%);
@@ -710,9 +710,14 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 }
 .user-card:hover { background: var(--rs-card-2); border-color: rgba(186, 214, 247, 0.2); }
 
-@media (min-width: 1200px) {
-    .explore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .explore-grid .user-card { margin-bottom: 0; }
+/* Explorar: grilla de resultados a 2 columnas (sin clase nueva en Java) */
+@media (min-width: 768px) {
+    .page-container > vaadin-vertical-layout:has(> .user-card) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .page-container > vaadin-vertical-layout:has(> .user-card) > .user-card { margin-bottom: 0; }
 }
 
 /* ============================================================
@@ -772,7 +777,21 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
    Chat
    ============================================================ */
 
-.chat-shell { height: 100vh; width: 100%; max-width: 1180px; margin: 0 auto; }
+.chat-shell {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* La vista de chat ocupa el alto disponible (encabezado + paneles) */
+.page-container:has(.chat-shell) {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
 .conversation-list {
     width: 320px;
@@ -1190,12 +1209,14 @@ vaadin-combo-box { width: 100%; }
 .auth-card vaadin-button { width: 100%; }
 
 /* Sidebar: ítems y "salir" a lo ancho */
-.app-nav-item { width: auto; padding-right: 125px; }
+.app-nav-item { width: auto; padding-right: 50px; }
 .app-logout { width: 100%;}
 
 /* Feed: contenedores a lo ancho */
 .layout-with-rail { width: 100%; }
 .layout-main { width: 100%; max-width: var(--rs-col); }
+/* Pila de publicaciones separada por aire (estilo mock: space-y-4) */
+.layout-main > vaadin-vertical-layout { gap: 16px; }
 .composer { width: 100%; }
 .composer vaadin-horizontal-layout,
 .composer vaadin-vertical-layout { width: 100%; }

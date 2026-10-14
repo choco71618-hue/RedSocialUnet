@@ -36,3 +36,6 @@ types.d.ts
 # Logs
 *.log
 logs/
+
+# Reglas locales de push (NO comitear)
+.push-check.md

@@ -36,7 +36,7 @@ public class ExploreView extends ProtectedView {
         super(session);
         this.api = api;
 
-        search.setPlaceholder("Buscar usuarios por nombre o @usuario...");
+        search.setPlaceholder("Buscar en el Edificio C...");
         search.setClearButtonVisible(true);
 
         Button searchButton = new Button("Buscar", VaadinIcon.SEARCH.create(), event -> doSearch());
@@ -55,9 +55,9 @@ public class ExploreView extends ProtectedView {
     private Div header() {
         Div header = new Div();
         header.addClassName("page-header");
-        Span eyebrow = new Span("DESCUBRÍ");
+        Span eyebrow = new Span("Directorio");
         eyebrow.addClassName("eyebrow");
-        Span title = new Span("Explorar");
+        Span title = new Span("Explorar Comunidad");
         title.addClassName("page-title");
         header.add(eyebrow, title);
         return header;

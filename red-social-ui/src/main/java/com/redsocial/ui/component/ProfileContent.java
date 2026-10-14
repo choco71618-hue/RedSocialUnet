@@ -37,6 +37,7 @@ public class ProfileContent extends VerticalLayout {
     private final ApiService api;
     private final UserSession session;
     private final VerticalLayout body = new VerticalLayout();
+    private final VerticalLayout tabContent = new VerticalLayout();
 
     public ProfileContent(String username, ApiService api, UserSession session) {
         this.username = username;
@@ -46,6 +47,8 @@ public class ProfileContent extends VerticalLayout {
         setSpacing(true);
         body.setPadding(false);
         body.setSpacing(true);
+        tabContent.setPadding(false);
+        tabContent.setSpacing(true);
         add(body);
         refresh();
     }
@@ -57,8 +60,9 @@ public class ProfileContent extends VerticalLayout {
             if (username == null) {
                 session.setUser(user);
             }
-            body.add(buildHeader(user));
-            body.add(buildTabs(user));
+            tabContent.removeAll();
+            body.add(buildHeader(user), buildTabs(user), tabContent);
+            loadPosts(user);
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());
         }
@@ -72,53 +76,53 @@ public class ProfileContent extends VerticalLayout {
         tabs.addClassName("profile-tabs");
 
         tabs.addSelectedChangeListener(event -> {
-            body.removeAll();
+            UserDto current;
             try {
-                UserDto current = username == null ? api.me() : api.profile(username);
-                body.add(buildHeader(current));
-                body.add(buildTabs(current));
-                com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
-                if (selected == tabPosts) {
-                    loadPosts(current);
-                } else if (selected == tabProjects) {
-                    loadProjects(current, com.redsocial.common.dto.ProjectKind.PROJECT);
-                } else {
-                    loadProjects(current, com.redsocial.common.dto.ProjectKind.EVENT);
-                }
+                current = username == null ? api.me() : api.profile(username);
             } catch (ApiException ex) {
                 Toast.show(ex.getMessage());
+                return;
+            }
+            com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
+            if (selected == tabProjects) {
+                loadProjects(current, com.redsocial.common.dto.ProjectKind.PROJECT);
+            } else if (selected == tabEvents) {
+                loadProjects(current, com.redsocial.common.dto.ProjectKind.EVENT);
+            } else {
+                loadPosts(current);
             }
         });
-        loadPosts(user);
         return tabs;
     }
 
     private void loadPosts(UserDto user) {
+        tabContent.removeAll();
         try {
             PageResponse<PostDto> posts = api.userPosts(user.username(), 0, 50);
             if (posts.content().isEmpty()) {
-                body.add(emptyState("Sin publicaciones todavía",
+                tabContent.add(emptyState("Sin publicaciones todavía",
                         "Cuando " + display(user) + " publique algo, aparecerá acá."));
                 return;
             }
-            posts.content().forEach(post -> body.add(new PostCard(post, api, session, this::refresh)));
+            posts.content().forEach(post -> tabContent.add(new PostCard(post, api, session, this::refresh)));
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());
         }
     }
 
     private void loadProjects(UserDto user, com.redsocial.common.dto.ProjectKind kind) {
+        tabContent.removeAll();
         try {
             java.util.List<com.redsocial.common.dto.ProjectDto> projects =
                     api.projects(kind, null, user.username());
             if (projects.isEmpty()) {
-                body.add(emptyState(kind == com.redsocial.common.dto.ProjectKind.EVENT
+                tabContent.add(emptyState(kind == com.redsocial.common.dto.ProjectKind.EVENT
                         ? "Sin eventos cargados" : "Sin proyectos cargados",
                         "Todavía no hay nada acá."));
                 return;
             }
             for (com.redsocial.common.dto.ProjectDto project : projects) {
-                body.add(projectRow(project, kind));
+                tabContent.add(projectRow(project, kind));
             }
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());

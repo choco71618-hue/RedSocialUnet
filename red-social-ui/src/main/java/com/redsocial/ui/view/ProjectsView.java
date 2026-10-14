@@ -73,9 +73,9 @@ public class ProjectsView extends ProtectedView {
     private Div header() {
         Div header = new Div();
         header.addClassName("page-header");
-        Span eyebrow = new Span("COMUNIDAD");
+        Span eyebrow = new Span("Comunidad");
         eyebrow.addClassName("eyebrow");
-        Span title = new Span("Proyectos");
+        Span title = new Span("Proyectos y Eventos");
         title.addClassName("page-title");
         header.add(eyebrow, title);
         return header;
@@ -430,13 +430,13 @@ public class ProjectsView extends ProtectedView {
         icon.addClassName("empty-icon");
         Span title = new Span(switch (kind) {
             case EVENT -> "Todavía no hay eventos";
-            case DONATION -> "No hay campañas de donación";
+            case DONATION -> "No hay campañas de donación activas";
             default -> "No hay proyectos cargados";
         });
         title.addClassName("empty-state-title");
         Span subtitle = new Span(switch (kind) {
-            case EVENT -> "Cargá el primer evento del campus.";
-            case DONATION -> "Iniciá una campaña para un nuevo espacio universitario.";
+            case EVENT -> "Cargá el primer evento del campus para convocar a la comunidad.";
+            case DONATION -> "Iniciá una colecta para equipamiento o soporte estudiantil.";
             default -> "Sumá un proyecto para mejorar la institución.";
         });
         div.add(icon, title, subtitle);

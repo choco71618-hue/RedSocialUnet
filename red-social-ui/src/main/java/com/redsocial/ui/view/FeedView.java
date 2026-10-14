@@ -59,7 +59,7 @@ public class FeedView extends ProtectedView {
         this.api = api;
         this.session = session;
 
-        composer.setPlaceholder("¿Qué está pasando en el C?");
+        composer.setPlaceholder("¿Qué está pasando en el Edificio C hoy?");
         composer.setMaxLength(2000);
         composer.addValueChangeListener(event -> {
             int len = composer.getValue() == null ? 0 : composer.getValue().length();
@@ -146,9 +146,9 @@ public class FeedView extends ProtectedView {
     private Div header() {
         Div header = new Div();
         header.addClassName("page-header");
-        Span eyebrow = new Span("FEED");
+        Span eyebrow = new Span("Comunidad Activa");
         eyebrow.addClassName("eyebrow");
-        Span title = new Span("Inicio");
+        Span title = new Span("Sumate al C.");
         title.addClassName("page-title");
         header.add(eyebrow, title);
         return header;
@@ -181,8 +181,8 @@ public class FeedView extends ProtectedView {
             PageResponse<PostDto> page = api.feed(0, 50);
             posts.removeAll();
             if (page.content().isEmpty()) {
-                posts.add(emptyState("Tu feed está vacío",
-                        "Seguí a otros usuarios desde Explorar o publicá algo para empezar."));
+                posts.add(emptyState("Tu feed está listo para conectar",
+                        "Escribí tu primer mensaje para iniciar la conversación en el Edificio C."));
                 return;
             }
             page.content().forEach(post -> posts.add(new PostCard(post, api, session, this::load)));

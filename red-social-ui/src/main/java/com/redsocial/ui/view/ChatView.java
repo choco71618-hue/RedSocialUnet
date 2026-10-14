@@ -73,11 +73,7 @@ public class ChatView extends ProtectedView {
                 event -> openNewConversation());
         newConversation.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 
-        Span eyebrow = new Span("MENSAJES");
-        eyebrow.addClassName("eyebrow");
-        eyebrow.addClassName("conversation-eyebrow");
-
-        VerticalLayout leftPane = new VerticalLayout(eyebrow, newConversation, conversationList);
+        VerticalLayout leftPane = new VerticalLayout(newConversation, conversationList);
         leftPane.addClassName("conversation-list");
         leftPane.setPadding(true);
         leftPane.setSpacing(true);
@@ -116,7 +112,18 @@ public class ChatView extends ProtectedView {
         shell.setSpacing(false);
         shell.setFlexGrow(1, threadPane);
 
-        add(shell);
+        add(header(), shell);
+    }
+
+    private Div header() {
+        Div header = new Div();
+        header.addClassName("page-header");
+        Span eyebrow = new Span("Mensajería");
+        eyebrow.addClassName("eyebrow");
+        Span title = new Span("Chat del Edificio C");
+        title.addClassName("page-title");
+        header.add(eyebrow, title);
+        return header;
     }
 
     @Override
