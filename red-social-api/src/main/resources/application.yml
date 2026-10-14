@@ -14,6 +14,10 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: ${MEDIA_MAX_VIDEO_BYTES:52428800}
+      max-request-size: ${MEDIA_MAX_REQUEST_BYTES:57671680}
   jackson:
     default-property-inclusion: non_null
     serialization:
@@ -35,11 +39,21 @@ app:
     allowed-origins: ${CORS_ORIGINS:http://localhost:8081}
   seed:
     enabled: false
-  cloudinary:
-    url: ${CLOUDINARY_URL:}
-    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
-    api-key: ${CLOUDINARY_API_KEY:}
-    api-secret: ${CLOUDINARY_API_SECRET:}
+  media:
+    storage: ${MEDIA_STORAGE:auto}
+    local-dir: ${MEDIA_LOCAL_DIR:uploads}
+    public-base-url: ${MEDIA_PUBLIC_BASE_URL:}
+    max-image-bytes: ${MEDIA_MAX_IMAGE_BYTES:8388608}
+    max-video-bytes: ${MEDIA_MAX_VIDEO_BYTES:52428800}
+  s3:
+    enabled: ${S3_ENABLED:false}
+    bucket: ${S3_BUCKET:}
+    region: ${S3_REGION:us-east-1}
+    endpoint: ${S3_ENDPOINT:}
+    access-key: ${S3_ACCESS_KEY:}
+    secret-key: ${S3_SECRET_KEY:}
+    public-base-url: ${S3_PUBLIC_BASE_URL:}
+    path-style-access: ${S3_PATH_STYLE:false}
 
 springdoc:
   swagger-ui:

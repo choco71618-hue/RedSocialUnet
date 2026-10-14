@@ -1,24 +1,27 @@
 package com.redsocial.ui.component;
 
+import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.PostDto;
 import com.redsocial.ui.client.ApiException;
 import com.redsocial.ui.client.ApiService;
 import com.redsocial.ui.session.UserSession;
 import com.redsocial.ui.util.AvatarUtil;
+import com.redsocial.ui.util.Linkifier;
 import com.redsocial.ui.util.Toast;
 import com.redsocial.ui.util.TimeFormat;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class PostCard extends VerticalLayout {
@@ -71,26 +74,40 @@ public class PostCard extends VerticalLayout {
         contentBlock.setPadding(false);
         contentBlock.setSpacing(true);
 
-        Paragraph content = new Paragraph(post.content());
-        content.addClassName("post-content");
-        contentBlock.add(content);
+        contentBlock.add(Linkifier.linkify(post.content()));
 
         if (post.mediaUrl() != null && !post.mediaUrl().isBlank()) {
-            com.vaadin.flow.component.html.Image image = new com.vaadin.flow.component.html.Image(post.mediaUrl(), "imagen");
-            image.addClassName("post-media");
-            image.getElement().setProperty("data-loaded", "false");
-            image.getElement().addEventListener("load", e ->
-                    image.getElement().setProperty("data-loaded", "true"));
-            image.addClickListener(event -> openLightbox(post.mediaUrl()));
-            contentBlock.add(image);
+            contentBlock.add(buildMedia(post.mediaUrl(), post.mediaType()));
         }
         return contentBlock;
+    }
+
+    private Component buildMedia(String url, MediaType type) {
+        if (isVideo(url, type)) {
+            return new VideoPlayer(url);
+        }
+        Image image = new Image(url, "imagen de la publicación");
+        image.addClassName("post-media");
+        image.addClickListener(event -> openLightbox(url));
+        return image;
+    }
+
+    private boolean isVideo(String url, MediaType type) {
+        if (type == MediaType.VIDEO) {
+            return true;
+        }
+        if (type == MediaType.IMAGE) {
+            return false;
+        }
+        String lower = url.toLowerCase(Locale.ROOT);
+        return lower.endsWith(".mp4") || lower.endsWith(".webm")
+                || lower.endsWith(".mov") || lower.endsWith(".ogg");
     }
 
     private void openLightbox(String src) {
         com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog();
         dialog.getElement().setAttribute("theme", "no-padding");
-        var img = new com.vaadin.flow.component.html.Image(src, "imagen completa");
+        var img = new Image(src, "imagen completa");
         img.addClassName("lightbox-img");
         dialog.add(img);
         dialog.setCloseOnOutsideClick(true);

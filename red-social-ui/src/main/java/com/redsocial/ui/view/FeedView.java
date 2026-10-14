@@ -1,6 +1,7 @@
 package com.redsocial.ui.view;
 
 import com.redsocial.common.dto.MediaDto;
+import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
 import com.redsocial.common.dto.ProjectDto;
@@ -10,6 +11,7 @@ import com.redsocial.ui.client.ApiException;
 import com.redsocial.ui.client.ApiService;
 import com.redsocial.ui.component.PostCard;
 import com.redsocial.ui.component.Skeleton;
+import com.redsocial.ui.component.VideoPlayer;
 import com.redsocial.ui.session.UserSession;
 import com.redsocial.ui.util.AvatarUtil;
 import com.redsocial.ui.util.Toast;
@@ -50,9 +52,10 @@ public class FeedView extends ProtectedView {
     private final VerticalLayout posts = new VerticalLayout();
     private final VerticalLayout rail = new VerticalLayout();
     private final MemoryBuffer buffer = new MemoryBuffer();
-    private final Image preview = new Image();
+    private final Div preview = new Div();
     private final Span count = new Span();
     private String pendingMediaUrl;
+    private MediaType pendingMediaType;
 
     public FeedView(ApiService api, UserSession session) {
         super(session);
@@ -116,30 +119,43 @@ public class FeedView extends ProtectedView {
 
     private Upload buildUpload() {
         Upload upload = new Upload(buffer);
-        upload.setAcceptedFileTypes("image/png", "image/jpeg", "image/gif", "image/webp");
-        upload.setMaxFileSize(8 * 1024 * 1024);
-        upload.setDropLabel(new Span("Imagen"));
+        upload.setAcceptedFileTypes(
+                "image/png", "image/jpeg", "image/gif", "image/webp",
+                "video/mp4", "video/webm", "video/quicktime", "video/ogg");
+        upload.setMaxFileSize(50 * 1024 * 1024);
+        upload.setDropLabel(new Span("Imagen o video"));
         upload.addSucceededListener(event -> {
             try {
                 byte[] bytes = buffer.getInputStream().readAllBytes();
-                String fileName = event.getFileName() == null ? "image.jpg" : event.getFileName();
+                String fileName = event.getFileName() == null ? "archivo" : event.getFileName();
                 MediaDto media = api.uploadMedia(bytes, event.getMIMEType(), fileName);
                 pendingMediaUrl = media.url();
-                preview.setSrc(media.url());
-                preview.setVisible(true);
+                pendingMediaType = media.mediaType();
+                renderPreview(media.url(), media.mediaType());
             } catch (ApiException ex) {
                 Toast.show(ex.getMessage());
             } catch (Exception ex) {
-                Toast.show("No se pudo subir la imagen");
+                Toast.show("No se pudo subir el archivo");
             }
         });
         upload.addClassName("feed-upload");
         return upload;
     }
 
+    private void renderPreview(String url, MediaType type) {
+        preview.removeAll();
+        if (type == MediaType.VIDEO) {
+            preview.add(new VideoPlayer(url));
+        } else {
+            preview.add(new Image(url, "previsualización"));
+        }
+        preview.setVisible(true);
+    }
+
     private void clearPreview() {
         pendingMediaUrl = null;
-        preview.setSrc("");
+        pendingMediaType = null;
+        preview.removeAll();
         preview.setVisible(false);
     }
 
@@ -165,7 +181,7 @@ public class FeedView extends ProtectedView {
 
     private void publish() {
         try {
-            api.createPost(composer.getValue(), pendingMediaUrl);
+            api.createPost(composer.getValue(), pendingMediaUrl, pendingMediaType);
             composer.clear();
             clearPreview();
             load();

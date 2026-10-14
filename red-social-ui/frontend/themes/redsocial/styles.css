@@ -479,14 +479,23 @@ body::before {
 .post-media {
     border: 1px solid var(--rs-hairline);
     border-radius: var(--rs-radius-m);
-    object-fit: cover;
-    aspect-ratio: 16 / 10;
     max-height: 480px;
     display: block;
-    cursor: zoom-in;
     background: var(--rs-track);
 }
-.post-media[data-loaded="false"] { opacity: 0; }
+img.post-media {
+    width: 100%;
+    object-fit: cover;
+    aspect-ratio: 16 / 10;
+    cursor: zoom-in;
+}
+video.post-media {
+    width: 100%;
+    object-fit: contain;
+    background: #000;
+}
+.post-link { color: var(--rs-accent); text-decoration: underline; word-break: break-word; }
+.post-link:hover { text-decoration: none; }
 
 .lightbox {
     position: fixed;
@@ -1123,7 +1132,8 @@ vaadin-notification-card {
 }
 .notification-text { color: var(--rs-text); font-size: 0.88rem; line-height: 1.45; }
 
-.composer-preview { border: 1px solid var(--rs-hairline); border-radius: var(--rs-radius-m); max-height: 320px; object-fit: cover; }
+.composer-preview { border: 1px solid var(--rs-hairline); border-radius: var(--rs-radius-m); overflow: hidden; max-width: 360px; }
+.composer-preview img, .composer-preview video { display: block; width: 100%; max-height: 320px; object-fit: cover; }
 
 .feed-upload { width: auto; }
 vaadin-upload { width: auto; }

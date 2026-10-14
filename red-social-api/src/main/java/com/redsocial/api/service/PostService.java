@@ -12,6 +12,7 @@ import com.redsocial.api.repository.PostLikeRepository;
 import com.redsocial.api.repository.PostRepository;
 import com.redsocial.api.repository.UserRepository;
 import com.redsocial.common.dto.CreatePostRequest;
+import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
 import org.springframework.data.domain.Page;
@@ -61,12 +62,15 @@ public class PostService {
         User author = userService.getEntity(currentUserId);
         String mediaUrl = request.mediaUrl() == null ? null : request.mediaUrl().trim();
         if (mediaUrl != null && mediaUrl.length() > 500) {
-            throw new BadRequestException("La URL de la imagen no puede superar los 500 caracteres");
+            throw new BadRequestException("La URL del archivo no puede superar los 500 caracteres");
         }
+        boolean hasMedia = mediaUrl != null && !mediaUrl.isEmpty();
+        MediaType mediaType = hasMedia ? request.mediaType() : null;
         Post post = postRepository.save(Post.builder()
                 .author(author)
                 .content(content)
-                .mediaUrl(mediaUrl == null || mediaUrl.isEmpty() ? null : mediaUrl)
+                .mediaUrl(hasMedia ? mediaUrl : null)
+                .mediaType(mediaType)
                 .build());
         return toDto(post, currentUserId);
     }

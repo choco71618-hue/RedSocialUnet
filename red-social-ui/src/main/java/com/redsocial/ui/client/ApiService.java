@@ -11,6 +11,7 @@ import com.redsocial.common.dto.CreateProjectRequest;
 import com.redsocial.common.dto.DonateRequest;
 import com.redsocial.common.dto.LoginRequest;
 import com.redsocial.common.dto.MediaDto;
+import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.MessageDto;
 import com.redsocial.common.dto.NotificationDto;
 import com.redsocial.common.dto.PageResponse;
@@ -114,13 +115,17 @@ public class ApiService {
     }
 
     public PostDto createPost(String content) {
-        return createPost(content, null);
+        return createPost(content, null, null);
     }
 
     public PostDto createPost(String content, String mediaUrl) {
+        return createPost(content, mediaUrl, null);
+    }
+
+    public PostDto createPost(String content, String mediaUrl, MediaType mediaType) {
         try {
             return client.post().uri("/posts").headers(auth())
-                    .body(new CreatePostRequest(content, mediaUrl)).retrieve().body(PostDto.class);
+                    .body(new CreatePostRequest(content, mediaUrl, mediaType)).retrieve().body(PostDto.class);
         } catch (Exception ex) {
             throw translate(ex);
         }
