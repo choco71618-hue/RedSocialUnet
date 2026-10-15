@@ -1,6 +1,7 @@
 package com.redsocial.ui.view;
 
 import com.redsocial.ui.session.UserSession;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -12,6 +13,9 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Landing pública que replica authkit.com.
@@ -28,9 +32,21 @@ import java.nio.charset.StandardCharsets;
 @StyleSheet("https://www.authkit.com/_next/static/chunks/0l0q6~h79kzc..css")
 @StyleSheet("https://www.authkit.com/_next/static/chunks/0kn7kgyjdnxlm.css")
 @StyleSheet("context://authkit/overrides.css")
+@StyleSheet("context://maplibre/maplibre-gl.css")
+@JavaScript("context://authkit/landing.js")
 public class LandingView extends Div implements BeforeEnterObserver {
 
     private static final String LANDING_RESOURCE = "static/authkit/landing.html";
+
+    /**
+     * En desarrollo leemos el HTML directamente del código fuente para que los
+     * cambios se vean al recargar la página (sin reiniciar la app). Si no existe
+     * (p. ej. en el jar empaquetado) se cae al recurso del classpath.
+     */
+    private static final String[] DEV_PATHS = {
+        "src/main/resources/static/authkit/landing.html",
+        "red-social-ui/src/main/resources/static/authkit/landing.html"
+    };
 
     private final UserSession session;
 
@@ -48,6 +64,16 @@ public class LandingView extends Div implements BeforeEnterObserver {
     }
 
     private static String loadLanding() {
+        for (String devPath : DEV_PATHS) {
+            Path path = Paths.get(devPath);
+            if (Files.isReadable(path)) {
+                try {
+                    return Files.readString(path, StandardCharsets.UTF_8);
+                } catch (IOException ex) {
+                    throw new UncheckedIOException("No se pudo leer " + path, ex);
+                }
+            }
+        }
         try (var in = new ClassPathResource(LANDING_RESOURCE).getInputStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException ex) {

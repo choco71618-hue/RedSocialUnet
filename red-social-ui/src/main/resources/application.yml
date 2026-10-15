@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: red-social-ui
+  web:
+    resources:
+      # En dev sirve primero los archivos fuente para que los cambios en
+      # /static se reflejen sin reiniciar; en el jar caen al classpath.
+      static-locations: file:src/main/resources/static/,file:red-social-ui/src/main/resources/static/,classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
 
 app:
   api:

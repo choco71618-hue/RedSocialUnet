@@ -1,4 +1,8 @@
 <main class="page-module___8aEwW__page">
+  <nav class="rs-topbar" aria-label="Acceso">
+    <a class="glowing-button-module__G7fw6a__button glowing-button-module__G7fw6a__button-size-medium" href="/login"><span class="glowing-button-module__G7fw6a__effect"></span><span class="glowing-button-module__G7fw6a__text">Inicio de sesión</span></a>
+    <a class="glowing-button-module__G7fw6a__button glowing-button-module__G7fw6a__button-size-medium" href="/register"><span class="glowing-button-module__G7fw6a__effect"></span><span class="glowing-button-module__G7fw6a__text">Registro</span></a>
+  </nav>
   <div class="hero hero--intro">
     <canvas style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5"></canvas>
     <div class="hero__spotlights">
@@ -24,53 +28,63 @@
         <div class="hero__vline" style="grid-area: v-line-6; opacity: 0.5"></div>
       </div>
     </div>
-    <header class="hero__header">
-      <div class="hero__powered-by">
-        <h2 class="powered-by-module__QMxJ1W__sr-only">WorkOS</h2>
-        <a href="https://workos.com" target="_blank" rel="noopener noreferrer" class="powered-by-module__QMxJ1W__link"
-          ><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="72" height="14" fill="none">
-            <g fill="currentColor" clip-path="url(#a)">
-              <path
-                d="M0 .186h2.79L4.8 8.464c.372 1.562.446 2.493.446 2.493h.037s.13-.911.503-2.493L7.7.186h3.163l2.027 8.278c.39 1.618.484 2.493.484 2.493h.056s.038-.875.409-2.493L15.775.186h2.79L15.03 13.765h-3.107L9.785 5.543c-.446-1.786-.484-2.585-.484-2.585h-.037s-.038.799-.447 2.585l-2.009 8.222H3.61L0 .185ZM18.1 8.832c0-3.107 2.008-5.116 5.041-5.116 3.014 0 5.023 2.009 5.023 5.116 0 3.124-2.01 5.153-5.023 5.153-3.031-.002-5.042-2.028-5.042-5.153Zm7.459 0c0-2.01-.967-3.145-2.418-3.145-1.562 0-2.437 1.266-2.437 3.145 0 2.046.967 3.18 2.437 3.18 1.563 0 2.418-1.265 2.418-3.18ZM29.41 3.868h2.473v1.824h.056c.428-.949 1.45-1.898 3.199-1.898.297 0 .484.038.614.074v2.474h-.074s-.223-.074-.837-.074c-1.916 0-2.958 1.134-2.958 3.254v4.241h-2.474V3.868ZM36.906.186h2.473v4.352c0 2.567-.038 3.032-.038 3.032h.038l3.683-3.701h3.088l-4.314 4.278 5.004 5.618H43.92l-3.61-4.093-.93.91v3.181h-2.473V.187ZM46.876 7.025c0-4.185 2.605-6.975 6.511-6.975 3.907 0 6.511 2.79 6.511 6.975S57.293 14 53.388 14c-3.907 0-6.512-2.79-6.512-6.975Zm10.324 0c0-2.846-1.525-4.763-3.814-4.763-2.29 0-3.813 1.917-3.813 4.763s1.525 4.762 3.813 4.762c2.288 0 3.814-1.916 3.814-4.762ZM60.845 9.245h2.828c0 1.6 1.098 2.493 2.772 2.493 1.414 0 2.382-.707 2.382-1.712 0-1.134-.744-1.433-3.107-1.897-2.158-.428-4.446-1.154-4.446-3.982C61.274 1.786 63.283 0 66.352 0c3.199 0 5.172 1.674 5.172 4.203h-2.828c0-1.227-.949-1.99-2.344-1.99-1.413 0-2.288.687-2.288 1.692 0 1.06.614 1.469 2.511 1.86 2.808.595 5.116.91 5.116 4.035 0 2.476-2.158 4.15-5.34 4.15-3.236 0-5.506-1.879-5.506-4.705Z"
-              ></path>
-            </g>
-            <defs>
-              <clipPath id="a"><path fill="#fff" d="M0 0h71.691v14H0z"></path></clipPath>
-            </defs></svg
-        ></a>
+    <section class="rs-hero-split" aria-label="Explorá el Edificio C">
+      <div class="rs-slider" data-rs-slider tabindex="0" aria-roledescription="carrusel">
+        <div class="rs-slider-track">
+          <article class="rs-slide is-active" data-rs-slide>
+            <img class="rs-slide-img" data-rs-base="/authkit/slides/slide-1" src="/authkit/slides/slide-1.svg" alt="Feed" loading="lazy" decoding="async" />
+            <div class="rs-slide-caption">
+              <span class="rs-slide-eyebrow">01 · Módulo</span>
+              <h3 class="rs-slide-title">Feed</h3>
+              <p class="rs-slide-text">Publicaciones, likes y comentarios de la comunidad del Edificio C.</p>
+            </div>
+          </article>
+          <article class="rs-slide" data-rs-slide>
+            <img class="rs-slide-img" data-rs-base="/authkit/slides/slide-2" src="/authkit/slides/slide-2.svg" alt="Chat" loading="lazy" decoding="async" />
+            <div class="rs-slide-caption">
+              <span class="rs-slide-eyebrow">02 · Módulo</span>
+              <h3 class="rs-slide-title">Chat</h3>
+              <p class="rs-slide-text">Mensajería en vivo con estudiantes, docentes y egresados.</p>
+            </div>
+          </article>
+          <article class="rs-slide" data-rs-slide>
+            <img class="rs-slide-img" data-rs-base="/authkit/slides/slide-3" src="/authkit/slides/slide-3.svg" alt="Proyectos" loading="lazy" decoding="async" />
+            <div class="rs-slide-caption">
+              <span class="rs-slide-eyebrow">03 · Módulo</span>
+              <h3 class="rs-slide-title">Proyectos</h3>
+              <p class="rs-slide-text">Compartí y descubrí proyectos de la facultad en un solo lugar.</p>
+            </div>
+          </article>
+          <article class="rs-slide" data-rs-slide>
+            <img class="rs-slide-img" data-rs-base="/authkit/slides/slide-4" src="/authkit/slides/slide-4.svg" alt="Eventos" loading="lazy" decoding="async" />
+            <div class="rs-slide-caption">
+              <span class="rs-slide-eyebrow">04 · Módulo</span>
+              <h3 class="rs-slide-title">Eventos</h3>
+              <p class="rs-slide-text">Actividades, charlas y fechas clave del calendario del C.</p>
+            </div>
+          </article>
+          <article class="rs-slide" data-rs-slide>
+            <img class="rs-slide-img" data-rs-base="/authkit/slides/slide-5" src="/authkit/slides/slide-5.svg" alt="Donaciones" loading="lazy" decoding="async" />
+            <div class="rs-slide-caption">
+              <span class="rs-slide-eyebrow">05 · Módulo</span>
+              <h3 class="rs-slide-title">Donaciones</h3>
+              <p class="rs-slide-text">Apoyá las iniciativas y el crecimiento de la comunidad.</p>
+            </div>
+          </article>
+        </div>
+        <button class="rs-slider-nav rs-prev" type="button" aria-label="Imagen anterior">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="rs-slider-nav rs-next" type="button" aria-label="Imagen siguiente">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="rs-slider-dots" aria-hidden="true"></div>
       </div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" viewBox="0 0 55.4 48" class="hero__workos-icon">
-        <g fill="rgba(186, 214, 247, 0.48)">
-          <path
-            d="M0 24c0 1.1.3 2.1.8 3l9.7 16.8c1 1.7 2.5 3.1 4.4 3.7 3.6 1.2 7.5-.3 9.4-3.5l2.3-4.1-9.2-16L27.2 7l2.3-4c.7-1.2 1.6-2.2 2.7-3h-15c-2.6 0-5.1 1.4-6.4 3.7L.8 21c-.5.9-.8 1.9-.8 3z"
-          ></path>
-          <path
-            d="M55.4 24c0-1.1-.3-2.1-.8-3L44.8 4C42.9.7 39-.7 35.4.5c-1.9.6-3.4 2-4.4 3.7L28.7 8 38 24l-9.8 16.9-2.3 4.1c-.7 1.2-1.6 2.2-2.7 3h15.1c2.6 0 5.1-1.4 6.4-3.7l10-17.3c.4-.9.7-1.9.7-3z"
-          ></path>
-        </g>
-      </svg>
-      <div class="hero__right">
-        <a
-          class="glowing-button-module__G7fw6a__button glowing-button-module__G7fw6a__button-size-medium hero__github"
-          href="https://github.com/choco71618-hue/RedSocialUnet"
-          target="_blank"
-          style="width: 36px; padding-inline: 0"
-          ><span class="glowing-button-module__G7fw6a__effect"></span
-          ><span class="glowing-button-module__G7fw6a__text"
-            ><svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M10.4756 2C5.97315 2 2.33331 5.66667 2.33331 10.2028C2.33331 13.8288 4.66548 16.8982 7.90081 17.9845C8.30531 18.0662 8.45348 17.808 8.45348 17.5908C8.45348 17.4007 8.44015 16.7488 8.44015 16.0697C6.17515 16.5587 5.70348 15.0918 5.70348 15.0918C5.33948 14.1412 4.80015 13.8968 4.80015 13.8968C4.05881 13.3943 4.85415 13.3943 4.85415 13.3943C5.67648 13.4487 6.10798 14.2363 6.10798 14.2363C6.83581 15.4857 8.00865 15.1327 8.48048 14.9153C8.54781 14.3857 8.76365 14.019 8.99281 13.8153C7.18631 13.6252 5.28565 12.919 5.28565 9.76817C5.28565 8.87183 5.60898 8.1385 6.12131 7.56817C6.04048 7.3645 5.75731 6.52233 6.20231 5.39517C6.20231 5.39517 6.88981 5.17783 8.43998 6.23717C9.10366 6.05761 9.78811 5.96627 10.4756 5.9655C11.1631 5.9655 11.864 6.06067 12.5111 6.23717C14.0615 5.17783 14.749 5.39517 14.749 5.39517C15.194 6.52233 14.9106 7.3645 14.8298 7.56817C15.3556 8.1385 15.6656 8.87183 15.6656 9.76817C15.6656 12.919 13.765 13.6115 11.945 13.8153C12.2416 14.0733 12.4976 14.5622 12.4976 15.3363C12.4976 16.4363 12.4843 17.3192 12.4843 17.5907C12.4843 17.808 12.6326 18.0662 13.037 17.9847C16.2723 16.898 18.6045 13.8288 18.6045 10.2028C18.6178 5.66667 14.9646 2 10.4756 2Z"
-                fill="#D1E4FA"
-              ></path></svg></span></a
-        ><a class="glowing-button-module__G7fw6a__button glowing-button-module__G7fw6a__button-size-medium" href="/register" target="_blank"
-          ><span class="glowing-button-module__G7fw6a__effect"></span
-          ><span class="glowing-button-module__G7fw6a__text">Get started</span></a
-        >
+      <div class="rs-map-wrap">
+        <div id="rs-hero-map" class="rs-map" role="application" aria-label="Mapa del Edificio C, UNET"></div>
+        <div class="rs-map-badge"><span class="rs-map-badge-dot"></span>Edificio C · UNET</div>
       </div>
-    </header>
-    <!-- hero: contenido a definir -->
+    </section>
     <span class="hero__cross" style="grid-area: cross-1"></span><span class="hero__cross" style="grid-area: cross-2"></span>
   </div>
   <div class="page-module___8aEwW__page-separator"></div>
