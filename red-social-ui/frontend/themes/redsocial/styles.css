@@ -677,6 +677,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 }
 .stat-pill + .stat-pill { border-left: 1px solid var(--rs-hairline); }
 .stat-pill:hover { background: var(--rs-accent-tint); }
+.stat-pill.clickable { cursor: pointer; }
 .stat-pill b { color: #ffffff; font-weight: 700; display: block; font-size: 1rem; font-family: 'Plus Jakarta Sans', sans-serif; }
 
 .profile-actions { margin-top: 16px; gap: 8px; }

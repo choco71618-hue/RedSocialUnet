@@ -165,9 +165,9 @@ public class ProfileContent extends VerticalLayout {
         handle.addClassName("profile-handle");
 
         HorizontalLayout stats = new HorizontalLayout(
-                statPill(user.followersCount(), "seguidores"),
-                statPill(user.followingCount(), "siguiendo"),
-                statPill(user.postsCount(), "publicaciones"));
+                statPill(user.followersCount(), "seguidores", () -> openFollowList(user, true)),
+                statPill(user.followingCount(), "siguiendo", () -> openFollowList(user, false)),
+                statPill(user.postsCount(), "publicaciones", null));
         stats.addClassName("profile-stats");
         stats.setPadding(false);
         stats.setSpacing(true);
@@ -190,14 +190,105 @@ public class ProfileContent extends VerticalLayout {
         return header;
     }
 
-    private Span statPill(long value, String label) {
+    private Span statPill(long value, String label, Runnable onClick) {
         Span span = new Span();
         span.addClassName("stat-pill");
         com.vaadin.flow.dom.Element number = new com.vaadin.flow.dom.Element("b");
         number.setText(String.valueOf(value));
         span.getElement().appendChild(number);
         span.add(new Span(" " + label));
+        if (onClick != null) {
+            span.addClassName("clickable");
+            span.addClickListener(event -> onClick.run());
+        }
         return span;
+    }
+
+    private void openFollowList(UserDto profile, boolean followers) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle(followers ? "Seguidores" : "Siguiendo");
+        VerticalLayout list = new VerticalLayout();
+        list.setPadding(false);
+        list.setSpacing(false);
+        dialog.add(list);
+        renderFollowList(dialog, list, profile, followers);
+        dialog.open();
+    }
+
+    private void renderFollowList(Dialog dialog, VerticalLayout list, UserDto profile, boolean followers) {
+        list.removeAll();
+        try {
+            java.util.List<UserDto> users = followers
+                    ? api.followers(profile.username())
+                    : api.following(profile.username());
+            if (users.isEmpty()) {
+                list.add(emptyState(followers ? "Sin seguidores todavía" : "No sigue a nadie todavía",
+                        "Cuando haya novedades, aparecerán acá."));
+                return;
+            }
+            for (UserDto user : users) {
+                list.add(followRow(dialog, list, profile, followers, user));
+            }
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+    }
+
+    private Div followRow(Dialog dialog, VerticalLayout list, UserDto profile, boolean followers, UserDto user) {
+        Avatar avatar = AvatarUtil.of(user);
+        avatar.addClassName("rs-avatar-sm");
+
+        Span name = new Span(display(user));
+        name.addClassName("post-author");
+        name.addClickListener(event -> {
+            dialog.close();
+            UI.getCurrent().navigate("profile/" + user.username());
+        });
+        Span handle = new Span("@" + user.username());
+        handle.addClassName("post-handle");
+
+        VerticalLayout info = new VerticalLayout(name, handle);
+        info.setPadding(false);
+        info.setSpacing(false);
+
+        Div card = new Div();
+        card.addClassName("user-card");
+        card.addClassName("explore-user-row");
+
+        boolean self = session.getUser() != null && Objects.equals(session.getUser().id(), user.id());
+        Button action;
+        if (self) {
+            action = new Button("Ver perfil", event -> {
+                dialog.close();
+                UI.getCurrent().navigate("profile");
+            });
+            action.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        } else if (user.following()) {
+            action = new Button("Dejar de seguir",
+                    event -> toggleFromList(dialog, list, profile, followers, user));
+            action.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        } else {
+            action = new Button("Seguir",
+                    event -> toggleFromList(dialog, list, profile, followers, user));
+            action.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        }
+
+        card.add(avatar, info, action);
+        return card;
+    }
+
+    private void toggleFromList(Dialog dialog, VerticalLayout list, UserDto profile, boolean followers, UserDto user) {
+        try {
+            if (user.following()) {
+                api.unfollow(user.username());
+            } else {
+                api.follow(user.username());
+            }
+            renderFollowList(dialog, list, profile, followers);
+            refresh();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
     }
 
     private HorizontalLayout buildActions(UserDto user) {

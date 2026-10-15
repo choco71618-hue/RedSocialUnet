@@ -82,6 +82,14 @@ public class ApiService {
         return get("/users/" + username, new ParameterizedTypeReference<>() {});
     }
 
+    public List<UserDto> followers(String username) {
+        return get("/users/" + username + "/followers", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<UserDto> following(String username) {
+        return get("/users/" + username + "/following", new ParameterizedTypeReference<>() {});
+    }
+
     public List<UserDto> search(String query) {
         return get("/users/search?q=" + query, new ParameterizedTypeReference<>() {});
     }
@@ -163,6 +171,14 @@ public class ApiService {
         try {
             return client.post().uri("/posts/" + postId + "/comments").headers(auth())
                     .body(new CreateCommentRequest(content)).retrieve().body(CommentDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void deleteComment(Long commentId) {
+        try {
+            client.delete().uri("/comments/" + commentId).headers(auth()).retrieve().toBodilessEntity();
         } catch (Exception ex) {
             throw translate(ex);
         }
