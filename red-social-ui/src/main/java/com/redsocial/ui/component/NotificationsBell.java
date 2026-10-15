@@ -9,6 +9,7 @@ import com.redsocial.ui.client.RealtimeBridge;
 import com.redsocial.ui.session.UserSession;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -16,8 +17,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.QueryParameters;
 
 import java.util.List;
+import java.util.Map;
 
 public class NotificationsBell extends Div {
 
@@ -51,7 +54,10 @@ public class NotificationsBell extends Div {
             }
         });
         refresh();
-        listener = dto -> refresh();
+        listener = dto -> {
+            refresh();
+            Toast.show(dto.text());
+        };
         bridge.addNotificationHandler(listener);
     }
 
@@ -85,7 +91,7 @@ public class NotificationsBell extends Div {
             try {
                 api.markAllNotificationsRead();
                 refresh();
-                renderList(list);
+                renderList(list, dialog);
             } catch (ApiException ex) {
                 Toast.show(ex.getMessage());
             }
@@ -96,10 +102,10 @@ public class NotificationsBell extends Div {
         dialog.getFooter().add(markAll, close);
         dialog.open();
 
-        renderList(list);
+        renderList(list, dialog);
     }
 
-    private void renderList(VerticalLayout list) {
+    private void renderList(VerticalLayout list, Dialog dialog) {
         list.removeAll();
         try {
             List<NotificationDto> notifications = api.notifications();
@@ -108,7 +114,7 @@ public class NotificationsBell extends Div {
                 return;
             }
             for (NotificationDto dto : notifications) {
-                list.add(row(dto, list));
+                list.add(row(dto, dialog));
             }
         } catch (ApiException ex) {
             list.add(empty("Error", ex.getMessage()));
@@ -124,7 +130,7 @@ public class NotificationsBell extends Div {
         return div;
     }
 
-    private Div row(NotificationDto dto, VerticalLayout list) {
+    private Div row(NotificationDto dto, Dialog dialog) {
         Div row = new Div();
         row.addClassName("notification-row");
         if (!dto.read()) {
@@ -149,14 +155,26 @@ public class NotificationsBell extends Div {
             try {
                 api.markNotificationRead(dto.id());
                 refresh();
-                list.remove(row);
-                if (list.getComponentCount() == 0) {
-                    list.add(empty("Sin notificaciones", "Cuando alguien interactúe, vas a verlo acá."));
-                }
+                dialog.close();
+                navigateTo(dto);
             } catch (ApiException ignored) {
             }
         });
         return row;
+    }
+
+    private void navigateTo(NotificationDto dto) {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            return;
+        }
+        switch (dto.type()) {
+            case FOLLOW -> ui.navigate("profile/" + dto.actorUsername());
+            case MESSAGE -> ui.navigate("chat",
+                    QueryParameters.simple(Map.of("conversation", String.valueOf(dto.targetId()))));
+            case DONATION -> ui.navigate("projects");
+            case LIKE, COMMENT -> ui.navigate("home");
+        }
     }
 
     private String iconName(NotificationType type) {
