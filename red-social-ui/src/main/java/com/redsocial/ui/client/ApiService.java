@@ -11,6 +11,7 @@ import com.redsocial.common.dto.CreateProjectRequest;
 import com.redsocial.common.dto.DonateRequest;
 import com.redsocial.common.dto.LoginRequest;
 import com.redsocial.common.dto.MediaDto;
+import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.MessageDto;
 import com.redsocial.common.dto.NotificationDto;
 import com.redsocial.common.dto.PageResponse;
@@ -81,6 +82,14 @@ public class ApiService {
         return get("/users/" + username, new ParameterizedTypeReference<>() {});
     }
 
+    public List<UserDto> followers(String username) {
+        return get("/users/" + username + "/followers", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<UserDto> following(String username) {
+        return get("/users/" + username + "/following", new ParameterizedTypeReference<>() {});
+    }
+
     public List<UserDto> search(String query) {
         return get("/users/search?q=" + query, new ParameterizedTypeReference<>() {});
     }
@@ -114,13 +123,17 @@ public class ApiService {
     }
 
     public PostDto createPost(String content) {
-        return createPost(content, null);
+        return createPost(content, null, null);
     }
 
     public PostDto createPost(String content, String mediaUrl) {
+        return createPost(content, mediaUrl, null);
+    }
+
+    public PostDto createPost(String content, String mediaUrl, MediaType mediaType) {
         try {
             return client.post().uri("/posts").headers(auth())
-                    .body(new CreatePostRequest(content, mediaUrl)).retrieve().body(PostDto.class);
+                    .body(new CreatePostRequest(content, mediaUrl, mediaType)).retrieve().body(PostDto.class);
         } catch (Exception ex) {
             throw translate(ex);
         }
@@ -158,6 +171,14 @@ public class ApiService {
         try {
             return client.post().uri("/posts/" + postId + "/comments").headers(auth())
                     .body(new CreateCommentRequest(content)).retrieve().body(CommentDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void deleteComment(Long commentId) {
+        try {
+            client.delete().uri("/comments/" + commentId).headers(auth()).retrieve().toBodilessEntity();
         } catch (Exception ex) {
             throw translate(ex);
         }

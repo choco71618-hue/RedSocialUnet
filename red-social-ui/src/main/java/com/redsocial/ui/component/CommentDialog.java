@@ -21,7 +21,14 @@ import com.vaadin.flow.component.textfield.TextArea;
 
 public class CommentDialog extends Dialog {
 
+    private final ApiService api;
+    private final UserSession session;
+    private final Runnable onChanged;
+
     public CommentDialog(PostDto post, ApiService api, UserSession session, Runnable onChanged) {
+        this.api = api;
+        this.session = session;
+        this.onChanged = onChanged;
         setHeaderTitle("Comentarios");
 
         VerticalLayout list = new VerticalLayout();
@@ -66,14 +73,14 @@ public class CommentDialog extends Dialog {
                 return;
             }
             for (CommentDto comment : page.content()) {
-                list.add(render(comment));
+                list.add(render(comment, post, list));
             }
         } catch (ApiException ex) {
             Toast.show(ex.getMessage());
         }
     }
 
-    private HorizontalLayout render(CommentDto comment) {
+    private HorizontalLayout render(CommentDto comment, PostDto post, VerticalLayout list) {
         Span author = new Span(display(comment));
         author.addClassName("post-author");
         Span body = new Span(comment.content());
@@ -95,7 +102,29 @@ public class CommentDialog extends Dialog {
                 text);
         row.addClassName("card");
         row.setAlignItems(FlexComponent.Alignment.START);
+
+        boolean canDelete = session.getUser() != null
+                && (java.util.Objects.equals(comment.authorId(), session.getUser().id())
+                || java.util.Objects.equals(post.authorId(), session.getUser().id()));
+        if (canDelete) {
+            Button delete = new Button(com.vaadin.flow.component.icon.VaadinIcon.TRASH.create(),
+                    event -> deleteComment(comment, post, list));
+            delete.addClassName("action-btn");
+            delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            row.add(delete);
+            row.setFlexGrow(1, text);
+        }
         return row;
+    }
+
+    private void deleteComment(CommentDto comment, PostDto post, VerticalLayout list) {
+        try {
+            api.deleteComment(comment.id());
+            load(list, post, api);
+            onChanged.run();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
     }
 
     private String display(CommentDto comment) {

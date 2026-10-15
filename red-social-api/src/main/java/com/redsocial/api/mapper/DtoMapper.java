@@ -49,6 +49,7 @@ public class DtoMapper {
                 author.getAvatarUrl(),
                 post.getContent(),
                 post.getMediaUrl(),
+                post.getMediaType(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 likeCount,

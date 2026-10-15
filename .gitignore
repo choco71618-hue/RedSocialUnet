@@ -39,3 +39,7 @@ logs/
 
 # Reglas locales de push (NO comitear)
 .push-check.md
+
+# Medios subidos (almacenamiento local)
+uploads/
+**/uploads/
