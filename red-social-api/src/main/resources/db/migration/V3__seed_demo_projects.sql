@@ -7,7 +7,7 @@
 
 -- Sistema de coworking en la UNET
 INSERT INTO projects (creator_id, kind, title, description, status, created_at, updated_at)
-SELECT COALESCE((SELECT id FROM users ORDER BY id OFFSET 0 LIMIT 1), u.id),
+SELECT COALESCE((SELECT id FROM users ORDER BY id LIMIT 1 OFFSET 0), u.id),
        'PROJECT',
        'Sistema de coworking en la UNET para colaborar y trabajar en conjunto',
        'Espacio compartido para estudiar, emprender y sacar proyectos adelante entre estudiantes y profesores del Edificio C.',
@@ -19,7 +19,7 @@ WHERE u.id = (SELECT MIN(id) FROM users)
 
 -- Laboratorio de impresión y prototipado público
 INSERT INTO projects (creator_id, kind, title, description, status, created_at, updated_at)
-SELECT COALESCE((SELECT id FROM users ORDER BY id OFFSET 1 LIMIT 1), u.id),
+SELECT COALESCE((SELECT id FROM users ORDER BY id LIMIT 1 OFFSET 1), u.id),
        'PROJECT',
        'Laboratorio de impresion y prototipado publico',
        'Montar un laboratorio abierto con impresoras 3D y herramientas para que cualquiera pueda prototipar sus ideas.',
@@ -31,7 +31,7 @@ WHERE u.id = (SELECT MIN(id) FROM users)
 
 -- Evento de Mario Kart
 INSERT INTO projects (creator_id, kind, title, description, event_date, location, created_at, updated_at)
-SELECT COALESCE((SELECT id FROM users ORDER BY id OFFSET 2 LIMIT 1), u.id),
+SELECT COALESCE((SELECT id FROM users ORDER BY id LIMIT 1 OFFSET 2), u.id),
        'EVENT',
        'Evento de Mario Kart',
        'Torneo de Mario Kart abierto a toda la comunidad. Traé tu control, habrá premios y buena música.',
@@ -44,7 +44,7 @@ WHERE u.id = (SELECT MIN(id) FROM users)
 
 -- Hackaton 2027
 INSERT INTO projects (creator_id, kind, title, description, event_date, location, created_at, updated_at)
-SELECT COALESCE((SELECT id FROM users ORDER BY id OFFSET 3 LIMIT 1), u.id),
+SELECT COALESCE((SELECT id FROM users ORDER BY id LIMIT 1 OFFSET 3), u.id),
        'EVENT',
        'Hackaton 2027',
        '48 horas de código, equipos y mentores para resolver retos del campus. Inscripciones abiertas.',
@@ -57,7 +57,7 @@ WHERE u.id = (SELECT MIN(id) FROM users)
 
 -- Reparación de techo del C
 INSERT INTO projects (creator_id, kind, title, description, status, created_at, updated_at)
-SELECT COALESCE((SELECT id FROM users ORDER BY id OFFSET 4 LIMIT 1), u.id),
+SELECT COALESCE((SELECT id FROM users ORDER BY id LIMIT 1 OFFSET 4), u.id),
        'PROJECT',
        'Reparacion de techo del C',
        'Reparar las filtraciones del techo del Edificio C para cuidar los espacios de estudio y el equipamiento.',

@@ -173,12 +173,12 @@ body::before {
     background: rgba(5, 6, 15, 0.82);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--rs-hairline);
-    padding: 0px;
+    padding: 8px 20px;
     z-index: 20;
 }
 
 .app-layout::part(content) {
-    padding-top: 60px;
+    padding-top: 76px;
     background: transparent;
 }
 
@@ -190,7 +190,7 @@ body::before {
 
 .app-layout::part(backdrop) { background: rgba(5, 6, 15, 0.6); backdrop-filter: blur(3px); }
 
-.app-navbar {
+vaadin-horizontal-layout.app-navbar {
     height: 60px;
     min-height: 60px;
     width: 100% !important;
@@ -207,7 +207,7 @@ body::before {
 .app-navbar .app-brand { margin: 0; }
 
 /* Acciones del navbar */
-.app-nav-actions {
+vaadin-horizontal-layout.app-nav-actions {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -245,7 +245,7 @@ body::before {
    Sidebar
    ============================================================ */
 
-.app-sidebar {
+vaadin-vertical-layout.app-sidebar {
     width: 100%;
     height: 100%;
     padding: 18px 14px;
@@ -256,7 +256,7 @@ body::before {
 
 .app-brand-box { margin: 6px 0 22px; }
 
-.app-brand { display: flex; align-items: center; gap: 10px; }
+vaadin-horizontal-layout.app-brand { display: flex; align-items: center; gap: 10px; }
 
 /* Insignia técnica "C" (Edificio C) */
 .app-brand-mark {
@@ -279,7 +279,7 @@ body::before {
 .app-brand-name { display: block; color: #ffffff; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.02em; }
 .app-brand-sub { display: block; color: var(--rs-accent); font-family: var(--rs-mono); font-size: 0.6rem; letter-spacing: 0.04em; }
 
-.app-nav { gap: 0px; }
+vaadin-vertical-layout.app-nav { gap: 0px; }
 
 .app-nav-item {
     display: flex;
@@ -312,13 +312,15 @@ body::before {
 .app-nav-item:hover .app-nav-icon { color: var(--rs-text-dim); }
 .app-nav-item.active .app-nav-icon { color: var(--rs-accent); }
 
-.app-user {
-    border-top: 1px solid var(--rs-hairline);
+vaadin-vertical-layout.app-user {
     gap: 10px;
     background: var(--rs-card);
     border: 1px solid var(--rs-hairline);
     border-radius: var(--rs-radius-m);
-    padding: 14px;
+    padding: 16px 14px;
+    margin-bottom: 6px;
+    width: 100%;
+    box-sizing: border-box;
     box-shadow: var(--rs-shadow-2);
     backdrop-filter: blur(16px);
 }
@@ -338,7 +340,7 @@ body::before {
 .app-content { height: 100dvh; overflow-y: auto; box-sizing: border-box; background: transparent; }
 
 /* Columna principal */
-.page-container {
+vaadin-vertical-layout.page-container {
     max-width: var(--rs-col);
     margin: 0 auto;
     padding: 80px 24px 96px;
@@ -541,7 +543,7 @@ video.post-media {
 .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: var(--rs-radius-m); box-shadow: var(--rs-shadow-2); }
 .lightbox-img { max-width: 92vw; max-height: 88vh; object-fit: contain; border-radius: 12px; }
 
-.post-actions {
+vaadin-horizontal-layout.post-actions {
     justify-content: space-between;
     gap: 4px;
     margin: 6px 0 0;
@@ -568,7 +570,7 @@ video.post-media {
    Composer
    ============================================================ */
 
-.composer {
+vaadin-horizontal-layout.composer {
     display: flex;
     gap: 12px;
     align-items: flex-start;
@@ -674,14 +676,14 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 
 .profile-avatar { position: absolute; left: var(--rs-gutter); bottom: -54px; border-radius: 50%; }
 
-.profile-head { padding: 0 4px; }
+vaadin-vertical-layout.profile-head { padding: 0 4px; }
 
 .profile-name { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .profile-handle { color: var(--rs-accent); margin-top: 2px; font-family: var(--rs-mono); font-size: 0.85rem; }
 
 .profile-bio { color: var(--rs-text-dim); margin: 10px 0 0; line-height: 1.6; }
 
-.profile-stats {
+vaadin-horizontal-layout.profile-stats {
     gap: 0;
     margin-top: 16px;
     width: fit-content;
@@ -709,7 +711,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 .stat-pill.clickable { cursor: pointer; }
 .stat-pill b { color: #ffffff; font-weight: 700; display: block; font-size: 1rem; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-.profile-actions { margin-top: 16px; gap: 8px; }
+vaadin-horizontal-layout.profile-actions { margin-top: 16px; gap: 8px; }
 
 .profile-back { gap: 6px; color: var(--rs-text-dim); font-weight: 600; align-self: flex-start; }
 .profile-back:hover { color: var(--rs-accent); }
@@ -775,7 +777,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 .project-title { font-size: 1.05rem; font-weight: 700; color: #ffffff; display: block; margin: 4px 0 8px; }
 .project-description { color: var(--rs-text-dim); font-size: 0.92rem; line-height: 1.6; display: block; white-space: pre-wrap; }
 
-.project-meta { gap: 12px; margin-top: 14px; color: var(--rs-text-dim); font-size: 0.85rem; font-family: var(--rs-mono); }
+span.project-meta, vaadin-horizontal-layout.project-meta { gap: 12px; margin-top: 14px; color: var(--rs-text-dim); font-size: 0.85rem; font-family: var(--rs-mono); }
 
 .date-badge {
     display: flex;
@@ -835,7 +837,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
     overflow: hidden;
 }
 
-.conversation-list {
+vaadin-vertical-layout.conversation-list {
     width: 320px;
     min-width: 320px;
     height: 100%;
@@ -889,7 +891,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 
 .conv-online { width: 10px; height: 10px; border-radius: 50%; background: var(--rs-success); flex: none; box-shadow: 0 0 0 2px var(--rs-bg); }
 
-.message-thread {
+vaadin-vertical-layout.message-thread {
     flex: 1;
     overflow-y: auto;
     padding: 18px 20px;
@@ -928,7 +930,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 
 .typing-indicator { padding: 4px var(--rs-gutter); font-size: 0.78rem; color: var(--rs-faint); font-style: italic; }
 
-.chat-composer { padding: 14px 18px; border-top: 1px solid var(--rs-hairline); background: transparent; }
+vaadin-horizontal-layout.chat-composer { padding: 14px 18px; border-top: 1px solid var(--rs-hairline); background: transparent; }
 
 .conversation-eyebrow { padding-top: 4px; }
 .conv-info { overflow: hidden; flex: 1; }
@@ -946,7 +948,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
     animation: rs-fade-in 0.4s var(--rs-ease) both;
 }
 
-.auth-hero {
+vaadin-vertical-layout.auth-hero {
     flex: 0 0 55%;
     min-width: 0;
     background: radial-gradient(120% 120% at 20% 10%, rgba(152, 192, 239, 0.16) 0%, rgba(5, 6, 15, 0) 60%), #05060f;
@@ -997,7 +999,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 .auth-hero h1 { font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 700; letter-spacing: -0.03em; margin: 18px 0 20px; line-height: 1.08; max-width: 480px; animation: rs-slide-in 0.7s var(--rs-ease) 0.12s both; }
 .auth-hero p { font-size: 1.02rem; color: rgba(199, 211, 234, 0.88); max-width: 440px; line-height: 1.6; margin: 0 0 8px; text-align: left; animation: rs-slide-in 0.7s var(--rs-ease) 0.24s both; }
 
-.auth-card {
+vaadin-vertical-layout.auth-card {
     width: 100%;
     max-width: 420px;
     margin: 0 auto;
@@ -1023,7 +1025,7 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 .auth-card vaadin-button[theme~="tertiary"] { color: var(--rs-text-dim) !important; }
 .auth-card vaadin-button[theme~="tertiary"]:hover { color: #ffffff !important; }
 
-.auth-panel {
+vaadin-vertical-layout.auth-panel {
     flex: 1 1 45%;
     min-width: 0;
     display: flex;
@@ -1355,9 +1357,9 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
 
 /* Tablet: sidebar solo iconos */
 @media (max-width: 1000px) {
-    .app-sidebar { width: 76px; padding: 16px 8px; }
+    vaadin-vertical-layout.app-sidebar { width: 76px; padding: 16px 8px; }
     .app-brand-box, .app-user-name, .app-user-handle, .app-user vaadin-avatar { display: none; }
-    .app-user { padding: 10px; border-radius: var(--rs-radius-m); }
+    vaadin-vertical-layout.app-user { padding: 10px; border-radius: var(--rs-radius-m); }
     .app-nav-item::part(label), .app-logout::part(label) { display: none; }
     .app-brand-text { display: none; }
     .app-nav-item, .app-logout { justify-content: center; }
@@ -1366,7 +1368,7 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     .notifications-badge { right: -6px; top: 0; transform: none; }
     .app-search { display: none; }
     .auth-hero { display: none; }
-    .auth-panel { flex: 1 1 100%; padding: 24px; }
+    vaadin-vertical-layout.auth-panel { flex: 1 1 100%; padding: 24px; }
 }
 
 /* Móvil */
@@ -1376,18 +1378,18 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     .app-layout::part(drawer) { display: none; }
     .app-layout::part(navbar) { padding: 0 12px; }
     .app-layout::part(content) { padding-top: 56px; }
-    .app-navbar { height: 56px; min-height: 56px; gap: 10px; }
+    vaadin-horizontal-layout.app-navbar { height: 56px; min-height: 56px; gap: 10px; }
     .app-navbar .app-brand { display: flex; }
-    .app-nav-actions { gap: 8px; margin-left: auto; }
+    vaadin-horizontal-layout.app-nav-actions { gap: 8px; margin-left: auto; }
     .app-search, .app-post-button { display: none; }
     .app-user-chip-name { display: none; }
     .app-bell { display: block; }
 
     /* --- Contenido: hueco para el footer + safe-area --- */
-    .page-container { padding: 72px 16px calc(84px + env(safe-area-inset-bottom)); }
+    vaadin-vertical-layout.page-container { padding: 72px 16px calc(84px + env(safe-area-inset-bottom)); }
 
     /* --- Footer de navegación --- */
-    .mobile-nav {
+    vaadin-horizontal-layout.mobile-nav {
         display: flex;
         position: fixed;
         left: 0;
@@ -1412,11 +1414,11 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     .chat-shell.is-thread .conversation-list { display: none; }
     .chat-shell.is-thread .thread-pane { display: flex; }
     .chat-back { display: inline-flex; }
-    .chat-composer { padding: 12px 14px; }
+    vaadin-horizontal-layout.chat-composer { padding: 12px 14px; }
 
     /* --- Auth --- */
     .auth-hero { display: none; }
-    .auth-panel { flex: 1 1 100%; padding: 24px 16px; }
+    vaadin-vertical-layout.auth-panel { flex: 1 1 100%; padding: 24px 16px; }
     .auth-card { padding: 24px !important; }
 
     /* --- Diálogos casi a pantalla completa --- */
@@ -1431,7 +1433,7 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     vaadin-text-area::part(input-field) { font-size: 16px; }
 
     /* --- Feed / interacción táctil --- */
-    .composer { padding: 14px 16px; }
+    vaadin-horizontal-layout.composer { padding: 14px 16px; }
     .post-card, .user-card, .project-card { padding-left: 16px; padding-right: 16px; }
     .post-media { max-height: 62dvh; }
     .action-btn { min-height: 44px; padding: 8px 12px; }
@@ -1471,9 +1473,9 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
 
 .rs-avatar-md { --vaadin-avatar-size: 56px; }
 
-.prepa-panel-root { gap: var(--rs-gutter); width: 100%; }
+vaadin-vertical-layout.prepa-panel-root { gap: var(--rs-gutter); width: 100%; }
 
-.prepa-card {
+vaadin-vertical-layout.prepa-card {
     background: var(--rs-card);
     border: 1px solid var(--rs-hairline);
     border-radius: var(--rs-radius-l);
@@ -1491,24 +1493,24 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     color: var(--rs-text-dim);
 }
 
-.prepa-filters { flex-wrap: wrap; gap: 12px; width: 100%; }
+vaadin-horizontal-layout.prepa-filters { flex-wrap: wrap; gap: 12px; width: 100%; }
 
 /* --- Tarjeta de preparador --- */
 .tutor-card {
     background: var(--rs-card-2);
     border: 1px solid var(--rs-hairline);
     border-radius: var(--rs-radius-m);
-    padding: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     transition: border-color 0.2s var(--rs-ease), transform 0.2s var(--rs-ease);
 }
 .tutor-card:hover { border-color: var(--rs-border-strong); transform: translateY(-1px); }
 
 .tutor-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.tutor-head { gap: 12px; }
-.tutor-head-info { gap: 2px; padding: 0; }
+vaadin-horizontal-layout.tutor-head { gap: 14px; }
+vaadin-vertical-layout.tutor-head-info { gap: 3px; padding: 0; min-width: 0; }
 .tutor-name { font-weight: 700; color: var(--rs-accent-strong); cursor: pointer; }
 .tutor-name:hover { text-decoration: underline; }
 
@@ -1537,7 +1539,7 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
 .tutor-empty-subjects { color: var(--rs-faint); font-size: 0.85rem; }
 .tutor-bio { color: var(--rs-text-dim); font-size: 0.88rem; }
 
-.tutor-footer { width: 100%; gap: 12px; }
+vaadin-horizontal-layout.tutor-footer { width: 100%; gap: 12px; flex-wrap: wrap; padding-bottom: 2px; }
 .rating-text { font-family: var(--rs-mono); font-size: 0.78rem; color: var(--rs-text-dim); }
 .rating-stars { color: #f5c451; letter-spacing: 2px; }
 
@@ -1567,7 +1569,7 @@ vaadin-dialog-overlay { width: min(94vw, 560px); }
     background: var(--rs-faint-bg);
     border: 1px solid var(--rs-hairline-2);
 }
-.connection-info { gap: 2px; padding: 0; }
+vaadin-vertical-layout.connection-info { gap: 2px; padding: 0; }
 .connection-name { font-weight: 600; color: var(--rs-accent-strong); }
 .review-code { font-family: var(--rs-mono); font-size: 0.72rem; color: var(--rs-text-dim); }
 
