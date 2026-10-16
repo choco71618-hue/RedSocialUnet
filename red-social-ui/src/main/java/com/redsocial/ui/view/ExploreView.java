@@ -13,7 +13,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -43,11 +42,9 @@ public class ExploreView extends ProtectedView {
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(search, searchButton);
-        bar.setAlignItems(FlexComponent.Alignment.END);
-        bar.setFlexGrow(1, search);
-
-        results.setPadding(false);
-        results.setSpacing(false);
+        bar.addClassName("explore-search-bar");
+        bar.addClassName("rs-items-end");
+        search.addClassName("rs-grow");
 
         add(header(), bar, results);
     }
@@ -66,6 +63,10 @@ public class ExploreView extends ProtectedView {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         super.beforeEnter(event);
+        event.getLocation().getQueryParameters().getSingleParameter("q").ifPresent(query -> {
+            search.setValue(query);
+            doSearch();
+        });
     }
 
     private void doSearch() {
@@ -90,8 +91,6 @@ public class ExploreView extends ProtectedView {
         handle.addClassName("post-handle");
 
         VerticalLayout info = new VerticalLayout(name, handle);
-        info.setPadding(false);
-        info.setSpacing(false);
 
         Button action;
         boolean self = session.getUser() != null && Objects.equals(session.getUser().id(), user.id());

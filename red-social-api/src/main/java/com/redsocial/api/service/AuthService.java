@@ -12,7 +12,9 @@ import com.redsocial.api.security.UserPrincipal;
 import com.redsocial.common.dto.AuthResponse;
 import com.redsocial.common.dto.LoginRequest;
 import com.redsocial.common.dto.RegisterRequest;
+import com.redsocial.common.dto.TutorType;
 import com.redsocial.common.dto.UserDto;
+import com.redsocial.common.dto.UserRole;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,12 +76,33 @@ public class AuthService {
         }
 
         String displayName = trim(request.displayName());
+        UserRole role = request.role();
+        String career = trim(request.career());
+        String subjectOfInterest = trim(request.subjectOfInterest());
+        TutorType tutorType = request.tutorType();
+
+        if (role == UserRole.STUDENT) {
+            if (career == null) {
+                throw new BadRequestException("La carrera es obligatoria para estudiantes");
+            }
+            if (subjectOfInterest == null) {
+                throw new BadRequestException("La materia de interés es obligatoria para estudiantes");
+            }
+        } else if (role == UserRole.TUTOR) {
+            if (tutorType == null) {
+                tutorType = TutorType.UNET;
+            }
+        }
+
         User user = User.builder()
                 .username(username)
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .displayName(displayName == null ? username : displayName)
-                .role("USER")
+                .role(role == null ? "USER" : role.name())
+                .career(career)
+                .subjectOfInterest(subjectOfInterest)
+                .tutorType(tutorType)
                 .enabled(true)
                 .build();
         userRepository.save(user);

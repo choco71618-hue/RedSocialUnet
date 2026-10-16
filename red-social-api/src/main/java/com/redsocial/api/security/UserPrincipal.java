@@ -7,10 +7,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public record UserPrincipal(Long id, String username, String password, String role) implements UserDetails {
+public record UserPrincipal(Long id, String username, String password, String role, boolean enabled)
+        implements UserDetails {
 
     public static UserPrincipal from(com.redsocial.api.domain.User user) {
-        return new UserPrincipal(user.getId(), user.getUsername(), user.getPassword(), user.getRole());
+        return new UserPrincipal(user.getId(), user.getUsername(), user.getPassword(), user.getRole(),
+                user.isEnabled());
     }
 
     @Override
@@ -45,6 +47,6 @@ public record UserPrincipal(Long id, String username, String password, String ro
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

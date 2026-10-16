@@ -1,5 +1,5 @@
 package com.redsocial.common.dto;
 
 public enum NotificationType {
-    FOLLOW, LIKE, COMMENT, MESSAGE, DONATION
+    FOLLOW, LIKE, COMMENT, MESSAGE, DONATION, CONNECTION, REVIEW
 }

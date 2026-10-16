@@ -36,6 +36,8 @@ RED-SOCIAL/
 - **Social**: seguir / dejar de seguir, contadores de seguidores y seguidos, búsqueda de usuarios.
 - **Publicaciones**: crear, feed (propio + de seguidos), likes, comentarios, eliminar.
 - **Chat**: conversaciones 1 a 1, mensajes, contador de no leídos y marcado como leído.
+- **Preparadurías**: roles `STUDENT`/`TUTOR`, materias con precio, conexión estudiante↔preparador
+  (solicitud, aceptar/rechazar, código de reseña), reseñas con calificación y filtros de búsqueda.
 - **Tiempo real**: WebSocket/STOMP en el backend; la UI de Vaadin refresca por sondeo corto (2 s).
 
 ## Requisitos
@@ -93,6 +95,10 @@ Variables de entorno principales (ver `application.yml` de cada módulo):
 | `CORS_ORIGINS` | api | http://localhost:8081 | Orígenes permitidos |
 | `API_BASE_URL` | ui | http://localhost:8080/api | URL del backend |
 | `API_PORT` / `UI_PORT` | api / ui | 8080 / 8081 | Puertos |
+| `MEDIA_STORAGE` | api | auto | Backend de medios: `cloudinary` / `s3` / `local` (auto prioriza Cloudinary) |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | api | — | Credenciales de Cloudinary |
+| `CLOUDINARY_URL` | api | — | Alternativa única: `cloudinary://<api_key>:<api_secret>@<cloud_name>` |
+| `CLOUDINARY_FOLDER` | api | redsocial | Carpeta raíz dentro de Cloudinary |
 
 Perfiles del backend: `dev` (H2 + seed) o por defecto (PostgreSQL).
 
@@ -115,6 +121,13 @@ Perfiles del backend: `dev` (H2 + seed) o por defecto (PostgreSQL).
 | POST | `/api/conversations` | Iniciar conversación |
 | GET/POST | `/api/conversations/{id}/messages` | Mensajes |
 | POST | `/api/conversations/{id}/read` | Marcar leído |
+| GET | `/api/tutors?q=&subject=&tutorType=` | Buscar preparadores |
+| GET | `/api/tutors/{username}` · `/reviews` | Preparador / reseñas |
+| GET | `/api/subjects` | Catálogo de materias |
+| GET/POST/DELETE | `/api/tutor-subjects` · `/api/tutor-subjects/{id}` | Materias del preparador |
+| GET/POST | `/api/connections` | Mis conexiones / solicitar |
+| POST | `/api/connections/{id}/accept` · `/reject` | Responder solicitud |
+| POST | `/api/connections/{id}/reviews` | Dejar reseña |
 
 ### WebSocket (STOMP)
 - Endpoint: `ws://localhost:8080/ws` (o SockJS `/ws`)
@@ -128,10 +141,15 @@ Perfiles del backend: `dev` (H2 + seed) o por defecto (PostgreSQL).
 ./mvnw -pl red-social-api -am test
 ```
 
+## Base de datos y migraciones
+El esquema lo versiona **Flyway** (`red-social-api/src/main/resources/db/migration/`):
+`V1__baseline.sql` (esquema base) y `V2__preparadurias.sql` (módulo Preparadurías).
+Hibernate corre en `ddl-auto=validate` (prod) y `validate` (dev/H2); ya no usa `update`.
+En una base existente, `baseline-on-migrate` la marca como v1 y aplica desde V2.
+
 ## Próximos pasos sugeridos (expansión)
-- Migraciones versionadas con Flyway/Liquibase (hoy `ddl-auto=update`).
 - Refresh tokens y roles/permisos más granulares (ADMIN).
-- Subida de archivos (avatar/imágenes de posts) a almacenamiento local/S3.
+- Subida de archivos (avatar/imágenes de posts) a Cloudinary (principal), S3 o almacenamiento local.
 - Notificaciones (nuevo seguidor, like, comentario, mensaje).
 - Grupos/“comunidades” y chat grupal (el modelo de conversación ya lo soporta).
 - Paginación por cursor e índices para escalar el feed.

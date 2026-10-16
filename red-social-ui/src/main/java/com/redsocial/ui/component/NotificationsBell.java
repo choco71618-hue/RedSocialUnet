@@ -83,8 +83,6 @@ public class NotificationsBell extends Div {
         dialog.setHeaderTitle("Notificaciones");
 
         VerticalLayout list = new VerticalLayout();
-        list.setPadding(false);
-        list.setSpacing(false);
         dialog.add(list);
 
         Button markAll = new Button("Marcar todas leídas", event -> {
@@ -141,8 +139,6 @@ public class NotificationsBell extends Div {
         icon.addClassName("notification-icon");
 
         VerticalLayout text = new VerticalLayout();
-        text.setPadding(false);
-        text.setSpacing(false);
         Span body = new Span(dto.text());
         body.addClassName("notification-text");
         text.add(body);
@@ -173,6 +169,7 @@ public class NotificationsBell extends Div {
             case MESSAGE -> ui.navigate("chat",
                     QueryParameters.simple(Map.of("conversation", String.valueOf(dto.targetId()))));
             case DONATION -> ui.navigate("projects");
+            case CONNECTION, REVIEW -> ui.navigate("preparadurias");
             case LIKE, COMMENT -> ui.navigate("home");
         }
     }
@@ -184,6 +181,8 @@ public class NotificationsBell extends Div {
             case COMMENT -> "💬";
             case MESSAGE -> "✉";
             case DONATION -> "$";
+            case CONNECTION -> "🤝";
+            case REVIEW -> "★";
         };
     }
 }

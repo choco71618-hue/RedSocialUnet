@@ -24,7 +24,6 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -82,35 +81,29 @@ public class FeedView extends ProtectedView {
         count.addClassName("composer-count");
 
         HorizontalLayout toolbar = new HorizontalLayout(upload, removePreview, count);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setPadding(false);
-        toolbar.setFlexGrow(1, count);
+        toolbar.addClassName("composer-toolbar");
+        toolbar.addClassName("rs-items-center");
+        count.addClassName("rs-grow");
 
         HorizontalLayout editorRow = new HorizontalLayout(composer, publish);
-        editorRow.setAlignItems(FlexComponent.Alignment.END);
-        editorRow.setFlexGrow(1, composer);
+        editorRow.addClassName("composer-editor-row");
+        editorRow.addClassName("rs-items-end");
+        composer.addClassName("rs-grow");
 
         VerticalLayout editor = new VerticalLayout(editorRow, preview, toolbar);
-        editor.setPadding(false);
-        editor.setSpacing(true);
+        editor.addClassName("composer-editor");
+        editor.addClassName("rs-gap");
 
         Avatar avatar = AvatarUtil.of(session.getUser());
         HorizontalLayout composerCard = new HorizontalLayout(avatar, editor);
         composerCard.addClassName("composer");
-        composerCard.setAlignItems(FlexComponent.Alignment.START);
-        composerCard.setFlexGrow(1, editor);
-
-        posts.setPadding(false);
-        posts.setSpacing(false);
+        composerCard.addClassName("rs-items-start");
+        editor.addClassName("rs-grow");
 
         VerticalLayout main = new VerticalLayout(header(), composerCard, posts);
-        main.setPadding(false);
-        main.setSpacing(false);
         main.addClassName("layout-main");
 
         rail.addClassName("layout-rail");
-        rail.setPadding(false);
-        rail.setSpacing(false);
 
         Div layout = new Div(main, rail);
         layout.addClassName("layout-with-rail");
@@ -237,8 +230,7 @@ public class FeedView extends ProtectedView {
 
     private VerticalLayout eventsCard(List<ProjectDto> events) {
         VerticalLayout card = new VerticalLayout();
-        card.setPadding(false);
-        card.setSpacing(false);
+        card.addClassName("rail-list");
 
         Span title = new Span("Próximos eventos del C");
         title.addClassName("rail-title");
@@ -270,8 +262,7 @@ public class FeedView extends ProtectedView {
 
     private VerticalLayout usersCard(List<UserDto> users) {
         VerticalLayout card = new VerticalLayout();
-        card.setPadding(false);
-        card.setSpacing(false);
+        card.addClassName("rail-list");
 
         Span title = new Span("A quién seguir");
         title.addClassName("rail-title");
@@ -296,8 +287,6 @@ public class FeedView extends ProtectedView {
         Span handle = new Span("@" + user.username());
         handle.addClassName("rail-sub");
         VerticalLayout info = new VerticalLayout(name, handle);
-        info.setPadding(false);
-        info.setSpacing(false);
 
         Button follow = new Button("Seguir", event -> {
             try {

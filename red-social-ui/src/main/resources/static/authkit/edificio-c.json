@@ -1,0 +1,66 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "kind": "building" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-72.2031715, 7.7925594],
+            [-72.2029124, 7.7922196],
+            [-72.1991019, 7.7917439],
+            [-72.1981417, 7.792129],
+            [-72.1976082, 7.7959194],
+            [-72.201373, 7.7963497],
+            [-72.2021122, 7.7944772],
+            [-72.2031715, 7.7925594]
+          ]
+        ]
+      }
+    },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2018524,7.7922891],[-72.2017604,7.7930212],[-72.2014109,7.7929696],[-72.2013969,7.7930466],[-72.2008685,7.7929946],[-72.2003485,7.792914],[-72.2001807,7.7940867],[-72.1999756,7.7940532],[-72.1997922,7.7941095],[-72.1996341,7.7949951],[-72.1996096,7.7953773],[-72.1996096,7.7954109],[-72.1997865,7.7954407],[-72.1997433,7.795698]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1997884,7.7954482]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.199787,7.7954395],[-72.1998247,7.7952454]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1996095,7.7954085],[-72.1994771,7.7953904],[-72.1994152,7.7957589]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.199639,7.7949708],[-72.1995211,7.7950255],[-72.1994719,7.7953951]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1996838,7.7947234],[-72.1992818,7.794649],[-72.1992062,7.7943444],[-72.1993504,7.7942978],[-72.199423,7.7939144],[-72.1999707,7.7940473]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1992324,7.7931129],[-72.1994276,7.7939228]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2002505,7.7935937],[-72.1993148,7.7934484]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1999645,7.7940377],[-72.2000072,7.7937052],[-72.1998943,7.793678],[-72.1999126,7.7935541]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.200694,7.7929711],[-72.2006063,7.7936215],[-72.2002519,7.7935942]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2017634,7.7930153],[-72.2016861,7.7935723],[-72.2008849,7.7934505],[-72.2008585,7.7936576],[-72.2006038,7.7936211]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2009657,7.7935445]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2008831,7.7934505],[-72.2006354,7.7934174]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2008831,7.793447],[-72.2009451,7.7930023]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.20092,7.7931946],[-72.2006793,7.7931528]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2005348,7.7929426],[-72.2004339,7.7936093]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.201828,7.7924137],[-72.2004598,7.792207],[-72.2003485,7.7929174]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2004671,7.7929325],[-72.2005761,7.7922273]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2006341,7.7922376],[-72.2008628,7.7924843],[-72.2010252,7.7925062],[-72.2009455,7.7930009]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2014071,7.7923462],[-72.2012264,7.7925253],[-72.2010234,7.7925052]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2003502,7.7929174],[-72.1993146,7.7927556],[-72.199236,7.7931093]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.1997801,7.7928065],[-72.1997057,7.7934991]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2003028,7.7932023],[-72.1997461,7.7931138]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2012886,7.7924764],[-72.2014346,7.7925059],[-72.2013749,7.792907],[-72.2014081,7.7929695]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.200964,7.7928902],[-72.2005846,7.7928318],[-72.2006413,7.7924926]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2005803,7.7928361],[-72.2005584,7.7929485]] } },
+    { "type": "Feature", "properties": { "kind": "path" }, "geometry": { "type": "LineString", "coordinates": [[-72.2011917,7.7930281],[-72.201123,7.7934911]] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Mecánica de Fluidos" }, "geometry": { "type": "Point", "coordinates": [-72.1998607, 7.7952689] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Simulación Computacional Aplicada a Termofluidos" }, "geometry": { "type": "Point", "coordinates": [-72.1998015, 7.7952608] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Prototipos" }, "geometry": { "type": "Point", "coordinates": [-72.1997825, 7.7957038] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Mecánica" }, "geometry": { "type": "Point", "coordinates": [-72.1997542, 7.7957006] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Investigaciones Genéticas" }, "geometry": { "type": "Point", "coordinates": [-72.1993968, 7.7956812] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorio de Investigación de Termofluidos" }, "geometry": { "type": "Point", "coordinates": [-72.199461, 7.7956898] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Departamento de Informática" }, "geometry": { "type": "Point", "coordinates": [-72.1995092, 7.7952165] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Salón Japonés (3er piso)" }, "geometry": { "type": "Point", "coordinates": [-72.1994711, 7.7951928] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Cafetín" }, "geometry": { "type": "Point", "coordinates": [-72.1996126, 7.795443] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorios de Informática (1er piso)" }, "geometry": { "type": "Point", "coordinates": [-72.1994702, 7.795433] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorios de Dibujo (2do piso)" }, "geometry": { "type": "Point", "coordinates": [-72.1994644, 7.7954188] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Laboratorios de Métodos (3er piso)" }, "geometry": { "type": "Point", "coordinates": [-72.1994673, 7.7952635] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Decanato de Postgrado (3er piso)" }, "geometry": { "type": "Point", "coordinates": [-72.1997434, 7.7954629] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Baños" }, "geometry": { "type": "Point", "coordinates": [-72.1994739, 7.7953617] } },
+    { "type": "Feature", "properties": { "kind": "place", "name": "Palomeras" }, "geometry": { "type": "Point", "coordinates": [-72.1995614, 7.7948979] } }
+  ]
+}

@@ -17,7 +17,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -38,8 +37,6 @@ public class PostCard extends VerticalLayout {
         this.onChanged = onChanged;
 
         addClassName("post-card");
-        setPadding(false);
-        setSpacing(false);
 
         add(buildHeader(), buildContent(), buildActions());
     }
@@ -60,19 +57,19 @@ public class PostCard extends VerticalLayout {
         time.addClassName("post-handle");
 
         HorizontalLayout meta = new HorizontalLayout(author, handle, separator, time);
-        meta.setPadding(false);
-        meta.setSpacing(true);
-        meta.setAlignItems(FlexComponent.Alignment.CENTER);
+        meta.addClassName("post-meta");
+        meta.addClassName("rs-gap-sm");
+        meta.addClassName("rs-items-center");
 
         HorizontalLayout header = new HorizontalLayout(avatar, meta);
-        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.addClassName("rs-items-center");
         return header;
     }
 
     private VerticalLayout buildContent() {
         VerticalLayout contentBlock = new VerticalLayout();
-        contentBlock.setPadding(false);
-        contentBlock.setSpacing(true);
+        contentBlock.addClassName("post-content-block");
+        contentBlock.addClassName("rs-gap");
 
         contentBlock.add(Linkifier.linkify(post.content()));
 
@@ -127,8 +124,6 @@ public class PostCard extends VerticalLayout {
 
         HorizontalLayout actions = new HorizontalLayout(like, comment);
         actions.addClassName("post-actions");
-        actions.setPadding(false);
-        actions.setSpacing(true);
 
         boolean mine = session.getUser() != null && Objects.equals(post.authorId(), session.getUser().id());
         if (mine) {

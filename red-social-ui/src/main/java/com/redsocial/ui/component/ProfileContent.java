@@ -4,6 +4,7 @@ import com.redsocial.common.dto.ConversationDto;
 import com.redsocial.common.dto.MediaDto;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
+import com.redsocial.common.dto.TutorType;
 import com.redsocial.common.dto.UpdateProfileRequest;
 import com.redsocial.common.dto.UserDto;
 import com.redsocial.ui.client.ApiException;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -43,12 +45,9 @@ public class ProfileContent extends VerticalLayout {
         this.username = username;
         this.api = api;
         this.session = session;
-        setPadding(false);
-        setSpacing(true);
-        body.setPadding(false);
-        body.setSpacing(true);
-        tabContent.setPadding(false);
-        tabContent.setSpacing(true);
+        addClassName("rs-gap");
+        body.addClassName("rs-gap");
+        tabContent.addClassName("rs-gap");
         add(body);
         refresh();
     }
@@ -169,24 +168,23 @@ public class ProfileContent extends VerticalLayout {
                 statPill(user.followingCount(), "siguiendo", () -> openFollowList(user, false)),
                 statPill(user.postsCount(), "publicaciones", null));
         stats.addClassName("profile-stats");
-        stats.setPadding(false);
-        stats.setSpacing(true);
 
         VerticalLayout info = new VerticalLayout();
         info.addClassName("profile-head");
-        info.setPadding(false);
-        info.setSpacing(false);
         info.add(name, handle);
         if (user.bio() != null && !user.bio().isBlank()) {
             Paragraph bio = new Paragraph(user.bio());
             bio.addClassName("profile-bio");
             info.add(bio);
         }
+        HorizontalLayout academic = academicChips(user);
+        if (academic != null) {
+            info.add(academic);
+        }
         info.add(stats, buildActions(user));
 
         VerticalLayout header = new VerticalLayout(cover, info);
-        header.setPadding(false);
-        header.setSpacing(true);
+        header.addClassName("rs-gap");
         return header;
     }
 
@@ -208,8 +206,7 @@ public class ProfileContent extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle(followers ? "Seguidores" : "Siguiendo");
         VerticalLayout list = new VerticalLayout();
-        list.setPadding(false);
-        list.setSpacing(false);
+        list.addClassName("rs-gap-sm");
         dialog.add(list);
         renderFollowList(dialog, list, profile, followers);
         dialog.open();
@@ -248,8 +245,6 @@ public class ProfileContent extends VerticalLayout {
         handle.addClassName("post-handle");
 
         VerticalLayout info = new VerticalLayout(name, handle);
-        info.setPadding(false);
-        info.setSpacing(false);
 
         Div card = new Div();
         card.addClassName("user-card");
@@ -291,15 +286,52 @@ public class ProfileContent extends VerticalLayout {
         }
     }
 
+    private HorizontalLayout academicChips(UserDto user) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.addClassName("profile-academic");
+        boolean any = false;
+        if ("STUDENT".equals(user.role())) {
+            any = chip(row, "Estudiante", "role-student") || any;
+            any = chip(row, user.career(), "academic-chip") || any;
+            any = chip(row, user.subjectOfInterest(), "academic-chip") || any;
+        } else if ("TUTOR".equals(user.role())) {
+            any = chip(row, "Preparador", "role-tutor") || any;
+            String type = user.tutorType() == null
+                    ? null
+                    : (user.tutorType() == TutorType.UNET ? "Preparador UNET" : "Clases privadas");
+            any = chip(row, type, "academic-chip") || any;
+        }
+        return any ? row : null;
+    }
+
+    private boolean chip(HorizontalLayout row, String text, String className) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+        Span span = new Span(text);
+        span.addClassName("profile-chip");
+        span.addClassName(className);
+        row.add(span);
+        return true;
+    }
+
     private HorizontalLayout buildActions(UserDto user) {
         HorizontalLayout actions = new HorizontalLayout();
         actions.addClassName("profile-actions");
-        actions.setPadding(false);
         boolean self = username == null || Objects.equals(session.getUser().id(), user.id());
         if (self) {
             Button edit = new Button("Editar perfil", event -> openEdit(user));
             edit.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-            actions.add(edit);
+
+            Button logout = new Button("Salir",
+                    com.vaadin.flow.component.icon.VaadinIcon.SIGN_OUT.create(), event -> {
+                        session.logout();
+                        UI.getCurrent().navigate(com.redsocial.ui.view.LoginView.class);
+                    });
+            logout.addClassName("profile-logout");
+            logout.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+            actions.add(edit, logout);
         } else {
             Button follow = new Button(user.following() ? "Dejar de seguir" : "Seguir",
                     event -> toggleFollow(user));
@@ -388,10 +420,27 @@ public class ProfileContent extends VerticalLayout {
             }
         });
 
+        TextField career = new TextField("Carrera");
+        career.setValue(user.career() == null ? "" : user.career());
+        career.setVisible("STUDENT".equals(user.role()));
+
+        TextField interest = new TextField("Materia de interés");
+        interest.setValue(user.subjectOfInterest() == null ? "" : user.subjectOfInterest());
+        interest.setVisible("STUDENT".equals(user.role()));
+
+        Select<TutorType> tutorType = new Select<>();
+        tutorType.setLabel("Tipo de preparador");
+        tutorType.setItems(TutorType.values());
+        tutorType.setItemLabelGenerator(t -> t == TutorType.UNET ? "Preparador UNET" : "Clases privadas");
+        tutorType.setValue(user.tutorType() == null ? TutorType.UNET : user.tutorType());
+        tutorType.setVisible("TUTOR".equals(user.role()));
+
         Button save = new Button("Guardar", event -> {
             try {
                 UserDto updated = api.updateProfile(new UpdateProfileRequest(
-                        displayName.getValue(), bio.getValue(), avatarUrl.getValue(), coverUrl.getValue()));
+                        displayName.getValue(), bio.getValue(), avatarUrl.getValue(), coverUrl.getValue(),
+                        career.getValue(), interest.getValue(),
+                        tutorType.isVisible() ? tutorType.getValue() : null));
                 session.setUser(updated);
                 dialog.close();
                 refresh();
@@ -403,8 +452,9 @@ public class ProfileContent extends VerticalLayout {
 
         Button cancel = new Button("Cancelar", event -> dialog.close());
 
-        VerticalLayout content = new VerticalLayout(displayName, bio, avatarUrl, avatarUpload, coverUrl, coverUpload);
-        content.setPadding(false);
+        VerticalLayout content = new VerticalLayout(displayName, bio, avatarUrl, avatarUpload,
+                coverUrl, coverUpload, career, interest, tutorType);
+        content.addClassName("rs-gap");
         dialog.add(content);
         dialog.getFooter().add(cancel, save);
         dialog.open();

@@ -21,6 +21,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
+    List<User> findByRoleOrderByCreatedAtAsc(String role, Pageable pageable);
+
+    long countByRole(String role);
+
     @Query("""
             select u from User u
             where lower(u.username) like lower(concat('%', :q, '%'))

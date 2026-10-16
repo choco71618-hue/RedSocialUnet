@@ -81,6 +81,23 @@ public class UserService {
             }
             user.setCoverUrl(coverUrl.isEmpty() ? null : coverUrl);
         }
+        if (request.career() != null) {
+            String career = request.career().trim();
+            if (career.length() > 120) {
+                throw new BadRequestException("La carrera no puede superar los 120 caracteres");
+            }
+            user.setCareer(career.isEmpty() ? null : career);
+        }
+        if (request.subjectOfInterest() != null) {
+            String interest = request.subjectOfInterest().trim();
+            if (interest.length() > 120) {
+                throw new BadRequestException("La materia de interés no puede superar los 120 caracteres");
+            }
+            user.setSubjectOfInterest(interest.isEmpty() ? null : interest);
+        }
+        if (request.tutorType() != null) {
+            user.setTutorType(request.tutorType());
+        }
         userRepository.save(user);
         return toDto(user, currentUserId);
     }

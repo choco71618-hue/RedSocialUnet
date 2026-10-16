@@ -43,3 +43,4 @@ logs/
 # Medios subidos (almacenamiento local)
 uploads/
 **/uploads/
+docs/

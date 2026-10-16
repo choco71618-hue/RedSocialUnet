@@ -14,6 +14,10 @@ public record UserDto(
         long followersCount,
         long followingCount,
         long postsCount,
-        Instant createdAt
+        Instant createdAt,
+        String role,
+        String career,
+        String subjectOfInterest,
+        TutorType tutorType
 ) {
 }

@@ -16,7 +16,6 @@ import com.redsocial.common.dto.MediaType;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +81,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PageResponse<PostDto> feed(Long currentUserId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = com.redsocial.api.util.Paging.of(page, size);
         Page<Post> posts = postRepository.findFeedForUser(currentUserId, pageable);
         return toPage(posts, currentUserId);
     }
@@ -91,7 +90,7 @@ public class PostService {
     public PageResponse<PostDto> byAuthor(String username, Long currentUserId, int page, int size) {
         User author = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + username));
-        Page<Post> posts = postRepository.findByAuthor_IdOrderByCreatedAtDesc(author.getId(), PageRequest.of(page, size));
+        Page<Post> posts = postRepository.findByAuthor_IdOrderByCreatedAtDesc(author.getId(), com.redsocial.api.util.Paging.of(page, size));
         return toPage(posts, currentUserId);
     }
 

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redsocial.common.dto.AuthResponse;
 import com.redsocial.common.dto.CommentDto;
+import com.redsocial.common.dto.ConnectionDto;
 import com.redsocial.common.dto.ConversationDto;
 import com.redsocial.common.dto.CreateCommentRequest;
+import com.redsocial.common.dto.CreateConnectionRequest;
 import com.redsocial.common.dto.CreatePostRequest;
 import com.redsocial.common.dto.CreateProjectRequest;
 import com.redsocial.common.dto.DonateRequest;
@@ -20,8 +22,15 @@ import com.redsocial.common.dto.ProjectDto;
 import com.redsocial.common.dto.ProjectKind;
 import com.redsocial.common.dto.ProjectStatus;
 import com.redsocial.common.dto.RegisterRequest;
+import com.redsocial.common.dto.ReviewDto;
+import com.redsocial.common.dto.ReviewRequest;
+import com.redsocial.common.dto.SaveTutorSubjectRequest;
 import com.redsocial.common.dto.SendMessageRequest;
 import com.redsocial.common.dto.StartConversationRequest;
+import com.redsocial.common.dto.SubjectDto;
+import com.redsocial.common.dto.TutorDto;
+import com.redsocial.common.dto.TutorSubjectDto;
+import com.redsocial.common.dto.TutorType;
 import com.redsocial.common.dto.UpdateProfileRequest;
 import com.redsocial.common.dto.UserDto;
 import com.redsocial.ui.config.ApiProperties;
@@ -324,6 +333,101 @@ public class ApiService {
         }
     }
 
+    public List<TutorDto> tutors(String q, String subject, TutorType tutorType) {
+        StringBuilder uri = new StringBuilder("/tutors");
+        char sep = '?';
+        if (q != null && !q.isBlank()) {
+            uri.append(sep).append("q=").append(enc(q.trim()));
+            sep = '&';
+        }
+        if (subject != null && !subject.isBlank()) {
+            uri.append(sep).append("subject=").append(enc(subject.trim()));
+            sep = '&';
+        }
+        if (tutorType != null) {
+            uri.append(sep).append("tutorType=").append(tutorType.name());
+        }
+        return get(uri.toString(), new ParameterizedTypeReference<>() {});
+    }
+
+    public TutorDto tutor(String username) {
+        return get("/tutors/" + enc(username), new ParameterizedTypeReference<>() {});
+    }
+
+    public List<ReviewDto> tutorReviews(String username) {
+        return get("/tutors/" + enc(username) + "/reviews", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<SubjectDto> subjects() {
+        return get("/subjects", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<TutorSubjectDto> myTutorSubjects() {
+        return get("/tutor-subjects", new ParameterizedTypeReference<>() {});
+    }
+
+    public TutorSubjectDto addTutorSubject(String subjectName, java.math.BigDecimal pricePerHour) {
+        try {
+            return client.post().uri("/tutor-subjects").headers(auth())
+                    .body(new SaveTutorSubjectRequest(subjectName, pricePerHour))
+                    .retrieve().body(TutorSubjectDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void removeTutorSubject(Long id) {
+        try {
+            client.delete().uri("/tutor-subjects/" + id).headers(auth()).retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public List<ConnectionDto> connections() {
+        return get("/connections", new ParameterizedTypeReference<>() {});
+    }
+
+    public ConnectionDto requestConnection(Long tutorId) {
+        try {
+            return client.post().uri("/connections").headers(auth())
+                    .body(new CreateConnectionRequest(tutorId)).retrieve().body(ConnectionDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public ConnectionDto acceptConnection(Long connectionId) {
+        try {
+            return client.post().uri("/connections/" + connectionId + "/accept").headers(auth())
+                    .retrieve().body(ConnectionDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public ConnectionDto rejectConnection(Long connectionId) {
+        try {
+            return client.post().uri("/connections/" + connectionId + "/reject").headers(auth())
+                    .retrieve().body(ConnectionDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public ReviewDto reviewConnection(Long connectionId, Integer rating, String comment, String reviewCode) {
+        try {
+            return client.post().uri("/connections/" + connectionId + "/reviews").headers(auth())
+                    .body(new ReviewRequest(rating, comment, reviewCode)).retrieve().body(ReviewDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    private String enc(String value) {
+        return java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     private <T> T get(String uri, ParameterizedTypeReference<T> type) {
         try {
             return client.get().uri(uri).headers(auth()).retrieve().body(type);
@@ -342,10 +446,22 @@ public class ApiService {
 
     private RuntimeException translate(Exception ex) {
         if (ex instanceof RestClientResponseException responseException) {
-            return new ApiException(extractMessage(responseException.getResponseBodyAsString()),
-                    responseException.getStatusCode().value());
+            int status = responseException.getStatusCode().value();
+            if (status == 401 && session.isLoggedIn()) {
+                session.logout();
+                redirectToLogin();
+                return new ApiException("Tu sesión expiró, volvé a iniciar sesión", status);
+            }
+            return new ApiException(extractMessage(responseException.getResponseBodyAsString()), status);
         }
         return new ApiException("No se pudo conectar con el servidor: " + ex.getMessage(), 0);
+    }
+
+    private void redirectToLogin() {
+        com.vaadin.flow.component.UI ui = com.vaadin.flow.component.UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> ui.navigate("login"));
+        }
     }
 
     private String extractMessage(String body) {

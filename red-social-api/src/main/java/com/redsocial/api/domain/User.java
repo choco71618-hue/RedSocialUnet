@@ -1,7 +1,10 @@
 package com.redsocial.api.domain;
 
+import com.redsocial.common.dto.TutorType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -56,6 +59,16 @@ public class User {
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String role = "USER";
+
+    @Column(length = 120)
+    private String career;
+
+    @Column(name = "subject_of_interest", length = 120)
+    private String subjectOfInterest;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tutor_type", length = 20)
+    private TutorType tutorType;
 
     @Column(nullable = false)
     @Builder.Default

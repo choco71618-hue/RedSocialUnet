@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 @StyleSheet("https://www.authkit.com/_next/static/chunks/0l0q6~h79kzc..css")
 @StyleSheet("https://www.authkit.com/_next/static/chunks/0kn7kgyjdnxlm.css")
 @StyleSheet("context://authkit/overrides.css")
-@StyleSheet("context://maplibre/maplibre-gl.css")
 @JavaScript("context://authkit/landing.js")
 public class LandingView extends Div implements BeforeEnterObserver {
 

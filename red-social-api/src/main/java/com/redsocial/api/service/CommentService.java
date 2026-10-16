@@ -13,7 +13,6 @@ import com.redsocial.common.dto.CommentDto;
 import com.redsocial.common.dto.CreateCommentRequest;
 import com.redsocial.common.dto.PageResponse;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +44,7 @@ public class CommentService {
         if (!postRepository.existsById(postId)) {
             throw ResourceNotFoundException.of("Publicación", postId);
         }
-        Page<Comment> comments = commentRepository.findByPost_IdOrderByCreatedAtAsc(postId, PageRequest.of(page, size));
+        Page<Comment> comments = commentRepository.findByPost_IdOrderByCreatedAtAsc(postId, com.redsocial.api.util.Paging.of(page, size));
         return PageResponse.of(
                 comments.getContent().stream().map(mapper::toCommentDto).toList(),
                 comments.getNumber(),

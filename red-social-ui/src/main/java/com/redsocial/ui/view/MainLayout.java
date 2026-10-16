@@ -14,7 +14,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -26,15 +25,19 @@ import java.util.Map;
 public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private final Map<String, Button> navItems = new LinkedHashMap<>();
+    private final Map<String, Button> mobileNavItems = new LinkedHashMap<>();
     private final UserSession session;
+    private final RealtimeBridge bridge;
 
     public MainLayout(UserSession session, ApiService api, RealtimeBridge bridge) {
         this.session = session;
+        this.bridge = bridge;
         setPrimarySection(Section.DRAWER);
         setDrawerOpened(true);
         addClassName("app-layout");
-        addToNavbar(buildNavbar(api));
-        addToDrawer(buildSidebar(session, api, bridge));
+        addToNavbar(buildNavbar(api, bridge));
+        addToDrawer(buildSidebar(session, api));
+        getElement().appendChild(buildMobileNav().getElement());
     }
 
     @Override
@@ -74,15 +77,18 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         String path = event.getLocation().getPath();
-        navItems.forEach((route, button) -> {
-            boolean active = route.isEmpty()
-                    ? (path == null || path.isEmpty())
-                    : path.startsWith(route);
-            button.getElement().getClassList().set("active", active);
-        });
+        navItems.forEach((route, button) -> applyActive(route, button, path));
+        mobileNavItems.forEach((route, button) -> applyActive(route, button, path));
     }
 
-    private HorizontalLayout buildNavbar(ApiService api) {
+    private void applyActive(String route, Button button, String path) {
+        boolean active = route.isEmpty()
+                ? (path == null || path.isEmpty())
+                : path.startsWith(route);
+        button.getElement().getClassList().set("active", active);
+    }
+
+    private HorizontalLayout buildNavbar(ApiService api, RealtimeBridge bridge) {
         com.vaadin.flow.component.textfield.TextField search = new com.vaadin.flow.component.textfield.TextField();
         search.setPlaceholder("Buscar en el C…");
         search.setClearButtonVisible(true);
@@ -96,15 +102,16 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         post.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         post.addClassName("app-post-button");
 
-        HorizontalLayout actions = new HorizontalLayout(search, post, userChip());
-        actions.addClassName("app-nav-actions");
-        actions.setPadding(false);
-        actions.setSpacing(false);
-        actions.setAlignItems(FlexComponent.Alignment.CENTER);
+        NotificationsBell bell = new NotificationsBell(api, session, bridge);
+        bell.addClassName("app-bell");
 
-        HorizontalLayout navbar = new HorizontalLayout(actions);
+        HorizontalLayout actions = new HorizontalLayout(search, post, bell, userChip());
+        actions.addClassName("app-nav-actions");
+        actions.addClassName("rs-items-center");
+
+        HorizontalLayout navbar = new HorizontalLayout(brand(), actions);
         navbar.addClassName("app-navbar");
-        navbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        navbar.addClassName("rs-items-center");
         return navbar;
     }
 
@@ -116,14 +123,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         Span sub = new Span("Edificio C · UNET");
         sub.addClassName("app-brand-sub");
         VerticalLayout text = new VerticalLayout(name, sub);
-        text.setPadding(false);
-        text.setSpacing(false);
         text.addClassName("app-brand-text");
         HorizontalLayout brand = new HorizontalLayout(mark, text);
         brand.addClassName("app-brand");
-        brand.setPadding(false);
-        brand.setSpacing(false);
-        brand.setAlignItems(FlexComponent.Alignment.CENTER);
         return brand;
     }
 
@@ -142,11 +144,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         return chip;
     }
 
-    private VerticalLayout buildSidebar(UserSession session, ApiService api, RealtimeBridge bridge) {
+    private VerticalLayout buildSidebar(UserSession session, ApiService api) {
         VerticalLayout sidebar = new VerticalLayout();
         sidebar.addClassName("app-sidebar");
-        sidebar.setPadding(false);
-        sidebar.setSpacing(false);
 
         HorizontalLayout brand = brand();
         brand.addClassName("app-brand-box");
@@ -154,21 +154,29 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         VerticalLayout nav = new VerticalLayout(
                 navItem("home", VaadinIcon.HOME, "Inicio"),
                 navItem("explore", VaadinIcon.SEARCH, "Explorar"),
+                navItem("preparadurias", VaadinIcon.ACADEMY_CAP, "Preparadurías"),
                 navItem("projects", VaadinIcon.ROCKET, "Proyectos"),
                 navItem("chat", VaadinIcon.COMMENTS, "Chat"),
                 navItem("profile", VaadinIcon.USER, "Perfil"));
         nav.addClassName("app-nav");
-        nav.setPadding(false);
-        nav.setSpacing(false);
-
-        NotificationsBell bell = new NotificationsBell(api, session, bridge);
-        bell.addClassName("app-bell");
 
         Span spacer = new Span();
         spacer.addClassName("app-spacer");
 
-        sidebar.add(brand, nav, bell, spacer, buildUserBox(session));
+        sidebar.add(brand, nav, spacer, buildUserBox(session));
         return sidebar;
+    }
+
+    private HorizontalLayout buildMobileNav() {
+        HorizontalLayout nav = new HorizontalLayout(
+                mobileNavItem("home", VaadinIcon.HOME, "Inicio"),
+                mobileNavItem("explore", VaadinIcon.SEARCH, "Explorar"),
+                mobileNavItem("preparadurias", VaadinIcon.ACADEMY_CAP, "Prepas"),
+                mobileNavItem("projects", VaadinIcon.ROCKET, "Proyectos"),
+                mobileNavItem("chat", VaadinIcon.COMMENTS, "Chat"),
+                mobileNavItem("profile", VaadinIcon.USER, "Perfil"));
+        nav.addClassName("mobile-nav");
+        return nav;
     }
 
     private Button navItem(String route, VaadinIcon icon, String text) {
@@ -180,11 +188,16 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         return button;
     }
 
+    private Button mobileNavItem(String route, VaadinIcon icon, String text) {
+        Button button = new Button(text, icon.create(), event -> UI.getCurrent().navigate(route));
+        button.addClassName("mobile-nav-item");
+        mobileNavItems.put(route, button);
+        return button;
+    }
+
     private VerticalLayout buildUserBox(UserSession session) {
         VerticalLayout box = new VerticalLayout();
         box.addClassName("app-user");
-        box.setPadding(false);
-        box.setSpacing(false);
 
         UserDto user = session.getUser();
         if (user != null) {
@@ -196,17 +209,17 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
             Span handle = new Span("@" + user.username());
             handle.addClassName("app-user-handle");
             VerticalLayout info = new VerticalLayout(name, handle);
-            info.setPadding(false);
-            info.setSpacing(false);
+            info.addClassName("app-user-info");
 
             HorizontalLayout row = new HorizontalLayout(avatar, info);
-            row.setAlignItems(FlexComponent.Alignment.CENTER);
+            row.addClassName("rs-items-center");
             box.add(row);
         }
 
         Icon out = VaadinIcon.SIGN_OUT.create();
         Button logout = new Button("Salir", out, event -> {
             session.logout();
+            bridge.disconnect();
             UI.getCurrent().navigate(LoginView.class);
         });
         logout.addClassName("app-logout");

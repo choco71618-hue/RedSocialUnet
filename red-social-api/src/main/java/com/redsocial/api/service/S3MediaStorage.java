@@ -15,7 +15,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -50,7 +49,8 @@ public class S3MediaStorage implements MediaStorage {
 
     @Override
     public StoredMedia store(MultipartFile file, String folder) {
-        String key = sanitizeFolder(folder) + "/" + UUID.randomUUID() + extensionOf(file.getOriginalFilename(), file.getContentType());
+        String key = sanitizeFolder(folder) + "/" + UUID.randomUUID()
+                + MediaStorage.extensionFor(file.getContentType());
         try {
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucket)
@@ -72,27 +72,5 @@ public class S3MediaStorage implements MediaStorage {
     private String sanitizeFolder(String folder) {
         String base = folder == null || folder.isBlank() ? "redsocial" : folder;
         return base.replaceAll("[^a-zA-Z0-9_/-]", "_");
-    }
-
-    private String extensionOf(String originalName, String contentType) {
-        if (originalName != null) {
-            int dot = originalName.lastIndexOf('.');
-            if (dot >= 0 && dot < originalName.length() - 1) {
-                String ext = originalName.substring(dot).toLowerCase(Locale.ROOT);
-                if (ext.matches("\\.[a-z0-9]{1,8}")) {
-                    return ext;
-                }
-            }
-        }
-        if (contentType != null) {
-            if (contentType.contains("mp4")) return ".mp4";
-            if (contentType.contains("webm")) return ".webm";
-            if (contentType.contains("quicktime")) return ".mov";
-            if (contentType.contains("png")) return ".png";
-            if (contentType.contains("gif")) return ".gif";
-            if (contentType.contains("webp")) return ".webp";
-            if (contentType.contains("jpeg") || contentType.contains("jpg")) return ".jpg";
-        }
-        return ".bin";
     }
 }

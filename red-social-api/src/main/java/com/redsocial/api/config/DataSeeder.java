@@ -1,8 +1,10 @@
 package com.redsocial.api.config;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import com.redsocial.api.domain.Comment;
+import com.redsocial.api.domain.Connection;
 import com.redsocial.api.domain.Conversation;
 import com.redsocial.api.domain.ConversationParticipant;
 import com.redsocial.api.domain.Donation;
@@ -11,8 +13,12 @@ import com.redsocial.api.domain.Message;
 import com.redsocial.api.domain.Post;
 import com.redsocial.api.domain.PostLike;
 import com.redsocial.api.domain.Project;
+import com.redsocial.api.domain.Review;
+import com.redsocial.api.domain.Subject;
+import com.redsocial.api.domain.TutorSubject;
 import com.redsocial.api.domain.User;
 import com.redsocial.api.repository.CommentRepository;
+import com.redsocial.api.repository.ConnectionRepository;
 import com.redsocial.api.repository.ConversationParticipantRepository;
 import com.redsocial.api.repository.ConversationRepository;
 import com.redsocial.api.repository.DonationRepository;
@@ -21,9 +27,14 @@ import com.redsocial.api.repository.MessageRepository;
 import com.redsocial.api.repository.PostLikeRepository;
 import com.redsocial.api.repository.PostRepository;
 import com.redsocial.api.repository.ProjectRepository;
+import com.redsocial.api.repository.ReviewRepository;
+import com.redsocial.api.repository.SubjectRepository;
+import com.redsocial.api.repository.TutorSubjectRepository;
 import com.redsocial.api.repository.UserRepository;
+import com.redsocial.common.dto.ConnectionStatus;
 import com.redsocial.common.dto.ProjectKind;
 import com.redsocial.common.dto.ProjectStatus;
+import com.redsocial.common.dto.TutorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -47,6 +58,10 @@ public class DataSeeder implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final DonationRepository donationRepository;
     private final MessageRepository messageRepository;
+    private final SubjectRepository subjectRepository;
+    private final TutorSubjectRepository tutorSubjectRepository;
+    private final ConnectionRepository connectionRepository;
+    private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(UserRepository userRepository,
@@ -59,6 +74,10 @@ public class DataSeeder implements CommandLineRunner {
                       ProjectRepository projectRepository,
                       DonationRepository donationRepository,
                       MessageRepository messageRepository,
+                      SubjectRepository subjectRepository,
+                      TutorSubjectRepository tutorSubjectRepository,
+                      ConnectionRepository connectionRepository,
+                      ReviewRepository reviewRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
@@ -70,6 +89,10 @@ public class DataSeeder implements CommandLineRunner {
         this.projectRepository = projectRepository;
         this.donationRepository = donationRepository;
         this.messageRepository = messageRepository;
+        this.subjectRepository = subjectRepository;
+        this.tutorSubjectRepository = tutorSubjectRepository;
+        this.connectionRepository = connectionRepository;
+        this.reviewRepository = reviewRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -83,13 +106,19 @@ public class DataSeeder implements CommandLineRunner {
         String encoded = passwordEncoder.encode("password123");
         User alice = userRepository.save(User.builder()
                 .username("alice").email("alice@redsocial.local").password(encoded)
-                .displayName("Alice").bio("Amante del código y el café.").role("USER").build());
+                .displayName("Alice").bio("Amante del código y el café.")
+                .role("STUDENT").career("Ingeniería Informática").subjectOfInterest("Programación")
+                .build());
         User bob = userRepository.save(User.builder()
                 .username("bob").email("bob@redsocial.local").password(encoded)
-                .displayName("Bob").bio("Backend developer.").role("USER").build());
+                .displayName("Bob").bio("Backend developer. Doy preparadurías de programación.")
+                .role("TUTOR").tutorType(TutorType.UNET)
+                .build());
         User carol = userRepository.save(User.builder()
                 .username("carol").email("carol@redsocial.local").password(encoded)
-                .displayName("Carol").bio("Diseñadora UX.").role("USER").build());
+                .displayName("Carol").bio("Diseñadora UX. Clases privadas de diseño.")
+                .role("TUTOR").tutorType(TutorType.PRIVATE)
+                .build());
 
         followRepository.save(Follow.builder().follower(alice).following(bob).build());
         followRepository.save(Follow.builder().follower(alice).following(carol).build());
@@ -154,6 +183,28 @@ public class DataSeeder implements CommandLineRunner {
         donationRepository.save(Donation.builder().project(impresion3d).donor(alice).amount(BigDecimal.valueOf(50000)).build());
         donationRepository.save(Donation.builder().project(impresion3d).donor(carol).amount(BigDecimal.valueOf(35000)).build());
 
-        log.info("Seed completado: usuarios de prueba alice/bob/carol con contraseña 'password123'");
+        // ---- Preparadurías: materias, conexión y reseña de ejemplo ----
+        Subject matematica = subjectRepository.save(Subject.builder().name("Matemática I").build());
+        Subject programacion = subjectRepository.save(Subject.builder().name("Programación en Java").build());
+        Subject diseno = subjectRepository.save(Subject.builder().name("Diseño").build());
+
+        tutorSubjectRepository.save(TutorSubject.builder()
+                .tutor(bob).subject(matematica).pricePerHour(BigDecimal.valueOf(4000)).build());
+        tutorSubjectRepository.save(TutorSubject.builder()
+                .tutor(bob).subject(programacion).pricePerHour(BigDecimal.valueOf(5500)).build());
+        tutorSubjectRepository.save(TutorSubject.builder()
+                .tutor(carol).subject(diseno).pricePerHour(BigDecimal.valueOf(3500)).build());
+
+        Connection connection = connectionRepository.save(Connection.builder()
+                .student(alice).tutor(bob)
+                .status(ConnectionStatus.ACCEPTED)
+                .reviewCode("ABC123")
+                .acceptedAt(Instant.now())
+                .build());
+        reviewRepository.save(Review.builder()
+                .connection(connection).student(alice).tutor(bob)
+                .rating(5).comment("Excelente explicación, muy claro.").build());
+
+        log.info("Seed completado: usuarios de prueba alice/STUDENT, bob/TUTOR y carol/TUTOR con contraseña 'password123'");
     }
 }

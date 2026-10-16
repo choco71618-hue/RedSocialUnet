@@ -14,7 +14,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -32,8 +31,7 @@ public class CommentDialog extends Dialog {
         setHeaderTitle("Comentarios");
 
         VerticalLayout list = new VerticalLayout();
-        list.setPadding(false);
-        list.setSpacing(true);
+        list.addClassName("rs-gap");
 
         TextArea input = new TextArea();
         input.setPlaceholder("Escribí un comentario...");
@@ -52,11 +50,12 @@ public class CommentDialog extends Dialog {
         send.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout composer = new HorizontalLayout(AvatarUtil.of(session.getUser()), input, send);
-        composer.setAlignItems(FlexComponent.Alignment.END);
-        composer.setFlexGrow(1, input);
+        composer.addClassName("comment-composer");
+        composer.addClassName("rs-items-end");
+        input.addClassName("rs-grow");
 
         VerticalLayout content = new VerticalLayout(list, composer);
-        content.setPadding(false);
+        content.addClassName("rs-gap");
         add(content);
 
         load(list, post, api);
@@ -89,19 +88,16 @@ public class CommentDialog extends Dialog {
         time.addClassName("post-handle");
 
         HorizontalLayout meta = new HorizontalLayout(author, time);
-        meta.setPadding(false);
-        meta.setSpacing(true);
-        meta.setAlignItems(FlexComponent.Alignment.CENTER);
+        meta.addClassName("rs-gap-sm");
+        meta.addClassName("rs-items-center");
 
         VerticalLayout text = new VerticalLayout(meta, body);
-        text.setPadding(false);
-        text.setSpacing(false);
 
         HorizontalLayout row = new HorizontalLayout(
                 AvatarUtil.create(comment.authorDisplayName(), comment.authorUsername(), comment.authorAvatarUrl()),
                 text);
         row.addClassName("card");
-        row.setAlignItems(FlexComponent.Alignment.START);
+        row.addClassName("rs-items-start");
 
         boolean canDelete = session.getUser() != null
                 && (java.util.Objects.equals(comment.authorId(), session.getUser().id())
@@ -112,7 +108,7 @@ public class CommentDialog extends Dialog {
             delete.addClassName("action-btn");
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
             row.add(delete);
-            row.setFlexGrow(1, text);
+            text.addClassName("rs-grow");
         }
         return row;
     }

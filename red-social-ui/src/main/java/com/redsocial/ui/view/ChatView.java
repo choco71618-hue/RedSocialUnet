@@ -21,7 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -43,6 +42,7 @@ public class ChatView extends ProtectedView {
     private final VerticalLayout thread = new VerticalLayout();
     private final TextArea input = new TextArea();
     private final Span typing = new Span();
+    private HorizontalLayout shell;
     private Long currentConversationId;
     private final RealtimeBridge.Consumer<MessageDto> messageListener = dto -> {
         if (dto != null && Objects.equals(dto.conversationId(), currentConversationId)
@@ -63,24 +63,15 @@ public class ChatView extends ProtectedView {
         this.api = api;
         this.bridge = bridge;
 
-        setPadding(false);
-        setSpacing(false);
-
-        conversationList.setPadding(false);
-        conversationList.setSpacing(false);
-
         Button newConversation = new Button("Nueva conversación", VaadinIcon.PLUS.create(),
                 event -> openNewConversation());
         newConversation.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 
         VerticalLayout leftPane = new VerticalLayout(newConversation, conversationList);
         leftPane.addClassName("conversation-list");
-        leftPane.setPadding(true);
-        leftPane.setSpacing(true);
+        leftPane.addClassName("rs-gap");
 
         thread.addClassName("message-thread");
-        thread.setPadding(false);
-        thread.setSpacing(false);
 
         typing.addClassName("typing-indicator");
         typing.setVisible(false);
@@ -98,21 +89,28 @@ public class ChatView extends ProtectedView {
 
         HorizontalLayout composer = new HorizontalLayout(input, send);
         composer.addClassName("chat-composer");
-        composer.setAlignItems(FlexComponent.Alignment.END);
-        composer.setFlexGrow(1, input);
+        composer.addClassName("rs-items-end");
+        input.addClassName("rs-grow");
 
-        VerticalLayout threadPane = new VerticalLayout(thread, typing, composer);
-        threadPane.setPadding(false);
-        threadPane.setSpacing(false);
-        threadPane.setFlexGrow(1, thread);
+        Button back = new Button("Volver", VaadinIcon.ARROW_LEFT.create(), event -> showList());
+        back.addClassName("chat-back");
+        back.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        HorizontalLayout shell = new HorizontalLayout(leftPane, threadPane);
+        VerticalLayout threadPane = new VerticalLayout(back, thread, typing, composer);
+        threadPane.addClassName("thread-pane");
+        threadPane.addClassName("rs-grow");
+
+        shell = new HorizontalLayout(leftPane, threadPane);
         shell.addClassName("chat-shell");
-        shell.setPadding(false);
-        shell.setSpacing(false);
-        shell.setFlexGrow(1, threadPane);
+        threadPane.addClassName("rs-grow");
 
         add(header(), shell);
+    }
+
+    private void showList() {
+        if (shell != null) {
+            shell.getElement().getClassList().set("is-thread", false);
+        }
     }
 
     private Div header() {
@@ -144,6 +142,7 @@ public class ChatView extends ProtectedView {
             }
         }
         if (currentConversationId == null) {
+            showList();
             thread.removeAll();
             thread.add(emptyState("Elegí una conversación", "Seleccioná un chat de la izquierda o creá uno nuevo."));
         } else {
@@ -221,8 +220,6 @@ public class ChatView extends ProtectedView {
         preview.addClassName("conv-preview");
 
         VerticalLayout info = new VerticalLayout(name, preview);
-        info.setPadding(false);
-        info.setSpacing(false);
         info.addClassName("conv-info");
 
         item.add(AvatarUtil.of(conversation.otherUser()), info);
@@ -239,6 +236,9 @@ public class ChatView extends ProtectedView {
         unsubscribeCurrent();
         currentConversationId = conversationId;
         subscribeCurrent();
+        if (shell != null) {
+            shell.getElement().getClassList().set("is-thread", true);
+        }
         try {
             api.markRead(conversationId);
         } catch (ApiException ignored) {
@@ -305,7 +305,7 @@ public class ChatView extends ProtectedView {
         search.setPlaceholder("Buscar usuario...");
 
         VerticalLayout results = new VerticalLayout();
-        results.setPadding(false);
+        results.addClassName("rs-gap-sm");
 
         Button find = new Button("Buscar", VaadinIcon.SEARCH.create(), event -> {
             results.removeAll();
@@ -327,11 +327,11 @@ public class ChatView extends ProtectedView {
         find.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(search, find);
-        bar.setAlignItems(FlexComponent.Alignment.END);
-        bar.setFlexGrow(1, search);
+        bar.addClassName("rs-items-end");
+        search.addClassName("rs-grow");
 
         VerticalLayout content = new VerticalLayout(bar, results);
-        content.setPadding(false);
+        content.addClassName("rs-gap");
         dialog.add(content);
         dialog.open();
     }
@@ -342,8 +342,6 @@ public class ChatView extends ProtectedView {
         Span handle = new Span("@" + user.username());
         handle.addClassName("post-handle");
         VerticalLayout info = new VerticalLayout(name, handle);
-        info.setPadding(false);
-        info.setSpacing(false);
 
         Div card = new Div();
         card.addClassName("user-card");

@@ -20,7 +20,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -64,6 +63,7 @@ public class ProjectsView extends ProtectedView {
 
         create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         create.addClassName("projects-create");
+        content.addClassName("rs-gap");
 
         add(header(), create, buildTabs(), content);
         tabs.addSelectedChangeListener(event -> load());
@@ -142,7 +142,7 @@ public class ProjectsView extends ProtectedView {
                 HorizontalLayout meta = new HorizontalLayout(dateBadge(project), new Span(formatEvent(project)),
                         new Span(project.location() == null ? "" : project.location()));
                 meta.addClassName("project-meta");
-                meta.setAlignItems(FlexComponent.Alignment.CENTER);
+                meta.addClassName("rs-items-center");
                 card.add(meta);
             }
             case DONATION -> card.add(donationBlock(project));
@@ -194,14 +194,11 @@ public class ProjectsView extends ProtectedView {
         handle.addClassName("post-handle");
 
         VerticalLayout info = new VerticalLayout(author, handle);
-        info.setPadding(false);
-        info.setSpacing(false);
 
         HorizontalLayout head = new HorizontalLayout(avatar, info);
-        head.setPadding(false);
-        head.setSpacing(true);
-        head.setAlignItems(FlexComponent.Alignment.CENTER);
         head.addClassName("project-head");
+        head.addClassName("rs-gap");
+        head.addClassName("rs-items-center");
         return head;
     }
 
@@ -225,8 +222,7 @@ public class ProjectsView extends ProtectedView {
 
     private VerticalLayout donationBlock(ProjectDto project) {
         VerticalLayout block = new VerticalLayout();
-        block.setPadding(false);
-        block.setSpacing(true);
+        block.addClassName("rs-gap");
 
         BigDecimal target = project.targetAmount() == null ? BigDecimal.ZERO : project.targetAmount();
         BigDecimal raised = project.raisedAmount() == null ? BigDecimal.ZERO : project.raisedAmount();
@@ -246,8 +242,8 @@ public class ProjectsView extends ProtectedView {
         donate.addClassName("project-donate");
 
         HorizontalLayout bottom = new HorizontalLayout(counter, donate);
-        bottom.setAlignItems(FlexComponent.Alignment.CENTER);
-        bottom.setFlexGrow(1, counter);
+        bottom.addClassName("rs-items-center");
+        counter.addClassName("rs-grow");
 
         block.add(bar, bottom);
         return block;
@@ -283,7 +279,6 @@ public class ProjectsView extends ProtectedView {
         Button cancel = new Button("Cancelar", event -> dialog.close());
 
         VerticalLayout body = new VerticalLayout(amount);
-        body.setPadding(false);
         dialog.add(body);
         dialog.getFooter().add(cancel, confirm);
         dialog.open();
@@ -316,8 +311,7 @@ public class ProjectsView extends ProtectedView {
         location.setPlaceholder("Ej: Aula Magna, Edificio Central");
 
         VerticalLayout body = new VerticalLayout(title, description, eventDate, location);
-        body.setPadding(false);
-        body.setSpacing(true);
+        body.addClassName("rs-gap");
 
         Button save = new Button("Guardar", event -> save(ProjectKind.EVENT, title, description,
                 new CreateProjectRequest(ProjectKind.EVENT, null, null, eventDate.getValue(), location.getValue(),
@@ -346,8 +340,7 @@ public class ProjectsView extends ProtectedView {
         target.setPrefixComponent(VaadinIcon.MONEY.create());
 
         VerticalLayout body = new VerticalLayout(title, description, target);
-        body.setPadding(false);
-        body.setSpacing(true);
+        body.addClassName("rs-gap");
 
         Button save = new Button("Guardar", event -> save(ProjectKind.DONATION, title, description,
                 new CreateProjectRequest(ProjectKind.DONATION, null, null, null, null,
@@ -378,8 +371,7 @@ public class ProjectsView extends ProtectedView {
         status.setValue(ProjectStatus.PROPOSED);
 
         VerticalLayout body = new VerticalLayout(title, description, status);
-        body.setPadding(false);
-        body.setSpacing(true);
+        body.addClassName("rs-gap");
 
         Button save = new Button("Guardar", event -> save(ProjectKind.PROJECT, title, description,
                 new CreateProjectRequest(ProjectKind.PROJECT, null, null, null, null, null, status.getValue()), dialog));

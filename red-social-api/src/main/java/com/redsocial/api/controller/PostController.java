@@ -8,6 +8,7 @@ import com.redsocial.common.dto.CreateCommentRequest;
 import com.redsocial.common.dto.CreatePostRequest;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +36,7 @@ public class PostController {
     @PostMapping("/posts")
     @ResponseStatus(HttpStatus.CREATED)
     public PostDto create(@AuthenticationPrincipal UserPrincipal me,
-                          @RequestBody CreatePostRequest request) {
+                           @Valid @RequestBody CreatePostRequest request) {
         return postService.create(me.id(), request);
     }
 
@@ -71,7 +72,7 @@ public class PostController {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto addComment(@AuthenticationPrincipal UserPrincipal me,
                                  @PathVariable Long id,
-                                 @RequestBody CreateCommentRequest request) {
+                                  @Valid @RequestBody CreateCommentRequest request) {
         return commentService.add(me.id(), id, request);
     }
 

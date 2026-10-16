@@ -8,8 +8,16 @@ import com.redsocial.common.dto.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Locale;
+import java.util.Set;
+
 @Service
 public class MediaService {
+
+    private static final Set<String> ALLOWED_IMAGE = Set.of(
+            "image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp", "image/avif");
+    private static final Set<String> ALLOWED_VIDEO = Set.of(
+            "video/mp4", "video/webm", "video/quicktime");
 
     private final MediaStorage storage;
     private final MediaProperties properties;
@@ -44,11 +52,21 @@ public class MediaService {
         if (contentType == null) {
             throw new BadRequestException("No se pudo determinar el tipo de archivo");
         }
-        if (contentType.startsWith("image/")) {
+        String type = contentType.toLowerCase(Locale.ROOT).split(";")[0].trim();
+        if (type.contains("svg")) {
+            throw new BadRequestException("No se permiten archivos SVG");
+        }
+        if (ALLOWED_IMAGE.contains(type)) {
             return MediaType.IMAGE;
         }
-        if (contentType.startsWith("video/")) {
+        if (ALLOWED_VIDEO.contains(type)) {
             return MediaType.VIDEO;
+        }
+        if (type.startsWith("image/")) {
+            throw new BadRequestException("Formato de imagen no permitido (usá PNG, JPEG, GIF, WEBP o AVIF)");
+        }
+        if (type.startsWith("video/")) {
+            throw new BadRequestException("Formato de video no permitido (usá MP4, WEBM o MOV)");
         }
         throw new BadRequestException("Solo se permiten imágenes o videos");
     }

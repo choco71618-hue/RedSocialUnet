@@ -11,8 +11,6 @@ public abstract class ProtectedView extends VerticalLayout implements BeforeEnte
 
     protected ProtectedView(UserSession session) {
         this.session = session;
-        setPadding(true);
-        setSpacing(true);
         addClassName("page-container");
     }
 

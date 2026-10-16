@@ -14,7 +14,6 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -36,8 +35,6 @@ public class LoginView extends HorizontalLayout implements BeforeEnterObserver {
         this.session = session;
 
         addClassName("auth-split");
-        setPadding(false);
-        setSpacing(false);
 
         VerticalLayout hero = hero();
         VerticalLayout panel = panel();
@@ -47,8 +44,7 @@ public class LoginView extends HorizontalLayout implements BeforeEnterObserver {
     private VerticalLayout hero() {
         VerticalLayout hero = new VerticalLayout();
         hero.addClassName("auth-hero");
-        hero.setPadding(false);
-        hero.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        hero.addClassName("rs-justify-center");
 
         Image logo = new Image("/logo_unet_blanco.png", "Logo UNET");
         logo.addClassName("auth-logo");
@@ -72,13 +68,10 @@ LottieView ocean = new LottieView("/animations/ocean.json");
     private VerticalLayout panel() {
         VerticalLayout panel = new VerticalLayout();
         panel.addClassName("auth-panel");
-        panel.setPadding(false);
-        panel.setSpacing(false);
-        panel.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        panel.addClassName("rs-justify-center");
 
         VerticalLayout card = new VerticalLayout();
         card.addClassName("auth-card");
-        card.setPadding(false);
 
         H1 title = new H1("Iniciar sesión");
         title.addClassName("auth-card-title");

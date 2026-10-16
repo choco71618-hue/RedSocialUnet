@@ -7,6 +7,7 @@ import com.redsocial.common.dto.DonateRequest;
 import com.redsocial.common.dto.ProjectDto;
 import com.redsocial.common.dto.ProjectKind;
 import com.redsocial.common.dto.ProjectStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,14 +47,14 @@ public class ProjectController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto create(@AuthenticationPrincipal UserPrincipal me,
-                             @RequestBody CreateProjectRequest request) {
+                              @Valid @RequestBody CreateProjectRequest request) {
         return projectService.create(me.id(), request);
     }
 
     @PostMapping("/{id}/donate")
     public ProjectDto donate(@AuthenticationPrincipal UserPrincipal me,
                              @PathVariable Long id,
-                             @RequestBody DonateRequest request) {
+                              @Valid @RequestBody DonateRequest request) {
         return projectService.donate(me.id(), id, request);
     }
 

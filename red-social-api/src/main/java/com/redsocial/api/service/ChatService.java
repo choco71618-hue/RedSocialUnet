@@ -17,7 +17,6 @@ import com.redsocial.common.dto.MessageDto;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.SendMessageRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +81,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public PageResponse<MessageDto> getMessages(Long currentUserId, Long conversationId, int page, int size) {
         requireParticipant(conversationId, currentUserId);
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = com.redsocial.api.util.Paging.of(page, size);
         Page<Message> messages = messageRepository.findByConversation_IdOrderByCreatedAtAsc(conversationId, pageable);
         return PageResponse.of(
                 messages.getContent().stream().map(mapper::toMessageDto).toList(),
@@ -167,6 +166,12 @@ public class ChatService {
                 .user(userRepository.getReferenceById(userB))
                 .build());
         return conversation;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isParticipant(Long conversationId, Long userId) {
+        return conversationId != null && userId != null
+                && participantRepository.findByConversation_IdAndUser_Id(conversationId, userId).isPresent();
     }
 
     private void requireParticipant(Long conversationId, Long userId) {

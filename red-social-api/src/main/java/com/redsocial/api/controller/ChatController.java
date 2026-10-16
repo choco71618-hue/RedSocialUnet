@@ -7,6 +7,7 @@ import com.redsocial.common.dto.MessageDto;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.SendMessageRequest;
 import com.redsocial.common.dto.StartConversationRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +39,7 @@ public class ChatController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ConversationDto start(@AuthenticationPrincipal UserPrincipal me,
-                                 @RequestBody StartConversationRequest request) {
+                                  @Valid @RequestBody StartConversationRequest request) {
         return chatService.startConversation(me.id(), request.recipientId());
     }
 
@@ -54,7 +55,7 @@ public class ChatController {
     @ResponseStatus(HttpStatus.CREATED)
     public MessageDto send(@AuthenticationPrincipal UserPrincipal me,
                            @PathVariable Long id,
-                           @RequestBody SendMessageRequest request) {
+                            @Valid @RequestBody SendMessageRequest request) {
         return chatService.send(me.id(), id, request.content());
     }
 

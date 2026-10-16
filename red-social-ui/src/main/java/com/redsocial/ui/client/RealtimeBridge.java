@@ -45,6 +45,7 @@ public class RealtimeBridge {
     private final List<Consumer<NotificationDto>> notificationHandlers = new CopyOnWriteArrayList<>();
     private final Map<Long, List<Consumer<MessageDto>>> messageHandlers = new ConcurrentHashMap<>();
     private final Map<String, List<Consumer<TypingInfo>>> typingHandlers = new ConcurrentHashMap<>();
+    private final Map<String, StompSession.Subscription> subscriptions = new ConcurrentHashMap<>();
 
     public RealtimeBridge(ApiProperties apiProperties, ObjectMapper objectMapper) {
         this.apiProperties = apiProperties;
@@ -81,9 +82,10 @@ public class RealtimeBridge {
                     }).get(10, TimeUnit.SECONDS);
             if (session.isConnected()) {
                 connected.set(true);
-                session.subscribe("/user/queue/notifications", new NotificationFrameHandler());
-                messageHandlers.keySet().forEach(id -> session.subscribe("/topic/conversations." + id, new MessageFrameHandler(id)));
-                typingHandlers.keySet().forEach(channel -> session.subscribe("/topic/conversations." + channel + ".typing", new TypingFrameHandler(channel)));
+                subscriptions.clear();
+                subscribeTracked("/user/queue/notifications", new NotificationFrameHandler());
+                messageHandlers.keySet().forEach(id -> subscribeTracked("/topic/conversations." + id, new MessageFrameHandler(id)));
+                typingHandlers.keySet().forEach(channel -> subscribeTracked("/topic/conversations." + channel + ".typing", new TypingFrameHandler(channel)));
                 log.info("RealtimeBridge conectado a {}", wsUrl);
             }
         } catch (Exception ex) {
@@ -109,14 +111,12 @@ public class RealtimeBridge {
             return;
         }
         messageHandlers.computeIfAbsent(conversationId, id -> new CopyOnWriteArrayList<>()).add(handler);
-        if (!isConnected()) {
-            return;
-        }
-        session.subscribe("/topic/conversations." + conversationId, new MessageFrameHandler(conversationId));
+        subscribeTracked("/topic/conversations." + conversationId, new MessageFrameHandler(conversationId));
     }
 
     public void unsubscribeConversation(Long conversationId) {
         messageHandlers.remove(conversationId);
+        unsubscribeTracked("/topic/conversations." + conversationId);
     }
 
     public void addTypingHandler(String channel, Consumer<TypingInfo> handler) {
@@ -124,14 +124,58 @@ public class RealtimeBridge {
             return;
         }
         typingHandlers.computeIfAbsent(channel, id -> new CopyOnWriteArrayList<>()).add(handler);
-        if (!isConnected()) {
-            return;
-        }
-        session.subscribe("/topic/conversations." + channel + ".typing", new TypingFrameHandler(channel));
+        subscribeTracked("/topic/conversations." + channel + ".typing", new TypingFrameHandler(channel));
     }
 
     public void removeTypingHandler(String channel) {
         typingHandlers.remove(channel);
+        unsubscribeTracked("/topic/conversations." + channel + ".typing");
+    }
+
+    /**
+     * Cierra la conexión STOMP y limpia las suscripciones. Se llama al cerrar
+     * sesión para no dejar el socket vivo con el token anterior.
+     */
+    public void disconnect() {
+        subscriptions.values().forEach(subscription -> {
+            try {
+                subscription.unsubscribe();
+            } catch (Exception ignored) {
+                // la sesión ya puede estar cerrada
+            }
+        });
+        subscriptions.clear();
+        if (session != null && session.isConnected()) {
+            try {
+                session.disconnect();
+            } catch (Exception ignored) {
+                // ignorar errores al cerrar
+            }
+        }
+        session = null;
+        connected.set(false);
+        notificationHandlers.clear();
+        messageHandlers.clear();
+        typingHandlers.clear();
+    }
+
+    private void subscribeTracked(String destination, StompFrameHandler handler) {
+        if (!isConnected()) {
+            return;
+        }
+        subscriptions.computeIfAbsent(destination, dest -> session.subscribe(dest, handler));
+    }
+
+    private void unsubscribeTracked(String destination) {
+        StompSession.Subscription subscription = subscriptions.remove(destination);
+        if (subscription == null) {
+            return;
+        }
+        try {
+            subscription.unsubscribe();
+        } catch (Exception ignored) {
+            // la sesión ya puede estar cerrada
+        }
     }
 
     public void sendTyping(Long conversationId, boolean typing) {

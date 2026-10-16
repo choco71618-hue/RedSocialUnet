@@ -4,6 +4,7 @@
    1) @font-face apuntando a las fuentes locales (las remotas
       son bloqueadas por CORS porque no envían ACAO).
    2) Habilitar scroll vertical (el CSS real pone overflow-y:hidden).
+   3) Revelar el hero (texto + cards) que authkit anima por JS.
    ============================================================ */
 
 /* --- Fuentes reales, servidas localmente --- */
@@ -84,31 +85,6 @@ html, body {
     transform: none !important;
 }
 
-/* ============================================================
-   3) Portada del Edificio C: split en dos secciones
-      Izquierda = slider de imágenes · Derecha = mapa MapLibre
-      (bloqueado al polígono de la zona)
-   ============================================================ */
-:root {
-    --rs-line: rgba(186, 216, 247, 0.12);
-    --rs-text: #e8eefc;
-    --rs-muted: #9fb0cc;
-    --rs-accent: #5b8dee;
-    --rs-accent-2: #7ea6f5;
-}
-
-/* El hero dejaba rows vacías del layout original; pasamos a flujo
-   normal para que el split quede pegado al header. */
-.hero.hero--intro {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 0px;
-}
-
-.hero.hero--intro > .hero__cross {
-    display: none !important;
-}
-
 /* Barra de acceso fija (Inicio de sesión / Registro) sobre el inicio */
 .rs-topbar {
     position: fixed;
@@ -120,64 +96,132 @@ html, body {
     gap: 10px;
 }
 
+/* Botones visibles sobre el fondo oscuro del hero */
+.rs-topbar .glowing-button-module__G7fw6a__button {
+    height: 38px;
+    line-height: 38px;
+    padding-inline: 18px;
+    background: rgba(12, 18, 34, 0.86);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 0 1px rgba(186, 214, 247, 0.4), 0 10px 24px rgba(0, 0, 0, 0.45);
+    --line-opacity: 0.9;
+}
+
+.rs-topbar .glowing-button-module__G7fw6a__text {
+    color: #eaf1ff;
+    -webkit-text-fill-color: #eaf1ff;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.rs-topbar .rs-topbar-cta {
+    background: linear-gradient(180deg, #5b8dee, #3b6fd6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 10px 26px rgba(59, 111, 214, 0.5);
+}
+
+.rs-topbar .rs-topbar-cta .glowing-button-module__G7fw6a__text {
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+}
+
 @media (max-width: 640px) {
     .rs-topbar {
-        top: 12px;
+        top: calc(12px + env(safe-area-inset-top));
         right: 12px;
         gap: 8px;
     }
+
+    /* Objetivos táctiles: botones de acceso más altos en móvil */
+    .rs-topbar .glowing-button-module__G7fw6a__button {
+        height: 44px;
+        line-height: 44px;
+        padding-inline: 14px;
+    }
 }
 
-.rs-hero-split {
-    position: relative;
-    z-index: 3;
-    width: 100%;
-    /* width: min(1280px, 94vw); */
-    margin: 0px;
-    padding: 0px;
-    /* display: grid; */
-    display: flex;
-    flex-direction: row;
-    grid-template-columns: 1fr 1fr;
-    /* gap: 20px; */
-    align-items: stretch;
-    height: 100vh;
+/* --- Título del hero (más grande) --- */
+
+/* --- Hero: colapsar las filas vacías (header/introducing/logo no existen en el
+   clon) para que el título quede arriba, y subir el slider. --- */
+.hero {
+    min-height: 100vh;
+    grid-template-rows: 1px 56px 1px 1px 1px 1px 1px 1px 1px minmax(120px, auto) 1px 440px 1px 200px !important;
 }
 
-/* --- Slider ------------------------------------------------- */
-.rs-slider {
+@media (min-width: 640px) {
+    .hero {
+        grid-template-rows: 1px 72px 1px 1px 1px 1px 1px 1px minmax(110px, auto) 1px 520px 1px 300px !important;
+    }
+}
+
+/* --- Título del hero (más grande) --- */
+.rs-hero-title {
+    font-size: clamp(2rem, 4.8vw, 3.9rem) !important;
+    line-height: 1.06 !important;
+    letter-spacing: -0.02em;
+}
+
+.rs-hero-title span {
+    line-height: inherit !important;
+}
+
+/* --- Slider de videos del hero: abanico (fan) con preview (poster) --- */
+.hero__cards {
+    display: block !important;
+    grid-column: 1 / -1 !important;
     width: 100%;
+}
+
+.rs-clips {
     position: relative;
-    min-height: 520px;
-    border-radius: 22px;
+    width: min(1240px, 96vw);
+    height: 470px;
+    margin: 0 auto;
+    padding: 0 58px;
+    box-sizing: border-box;
+}
+
+.rs-clips-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.rs-clip {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: clamp(180px, 19vw, 252px);
+    aspect-ratio: 9 / 16;
+    margin: 0;
+    border-radius: 18px;
     overflow: hidden;
-    background: rgba(9, 14, 28, 0.6);
-    border: 1px solid var(--rs-line);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    outline: none;
-}
-
-.rs-slider-track {
-    position: absolute;
-    inset: 0;
-}
-
-.rs-slide {
-    position: absolute;
-    inset: 0;
+    background: #05060f;
+    cursor: pointer;
+    transform-origin: bottom center;
+    transform: translateX(-50%) translateY(260px) scale(0.7);
     opacity: 0;
-    transform: scale(1.06);
-    transition: opacity 0.8s ease, transform 6s ease;
-    pointer-events: none;
+    will-change: transform, opacity;
+    transition: transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.45s ease,
+        box-shadow 0.3s ease;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(186, 214, 247, 0.2);
 }
 
-.rs-slide.is-active {
+.rs-clip.is-near {
     opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
 }
 
-.rs-slide-img {
+.rs-clip.is-center {
+    box-shadow: 0 34px 80px rgba(91, 141, 238, 0.5), inset 0 0 0 1px rgba(125, 176, 255, 0.65);
+}
+
+.rs-clip-poster,
+.rs-clip-video {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -186,188 +230,259 @@ html, body {
     display: block;
 }
 
-.rs-slide-caption {
+.rs-clip-poster {
+    z-index: 2;
+    transition: opacity 0.35s ease;
+}
+
+.rs-clip.is-playing .rs-clip-poster {
+    opacity: 0;
+}
+
+.rs-clip-video {
+    z-index: 1;
+    background: #05060f;
+}
+
+.rs-clip-play {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 28px 28px 66px;
-    background: linear-gradient(to top, rgba(3, 6, 14, 0.94), rgba(3, 6, 14, 0.55) 55%, transparent);
-}
-
-.rs-slide-eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    font: 600 11px/1 "IBM Plex Mono", ui-monospace, monospace;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--rs-accent-2);
-}
-
-.rs-slide-title {
-    margin: 0 0 6px;
-    color: #fff;
-    font: 800 clamp(24px, 2.4vw, 32px)/1.05 "Untitled Sans", system-ui, sans-serif;
-    letter-spacing: -0.01em;
-}
-
-.rs-slide-text {
-    margin: 0;
-    max-width: 42ch;
-    color: var(--rs-muted);
-    font-size: 14.5px;
-    line-height: 1.5;
-}
-
-.rs-slider-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 4;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+    inset: 0;
+    margin: auto;
+    width: 58px;
+    height: 58px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(6, 10, 20, 0.55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    cursor: pointer;
     display: grid;
     place-items: center;
-    color: #eaf1ff;
-    cursor: pointer;
-    background: rgba(6, 10, 20, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    z-index: 3;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+@keyframes rsClipPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    }
+    50% {
+        transform: scale(1.12);
+        box-shadow: 0 14px 36px rgba(91, 141, 238, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    }
+}
+
+.rs-clip.is-center .rs-clip-play {
+    animation: rsClipPulse 2.6s ease-in-out infinite;
+}
+
+.rs-clip.is-playing .rs-clip-play {
+    display: none;
+}
+
+.rs-clip-toggle {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(6, 10, 20, 0.66);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    color: #eaf1ff;
+    cursor: pointer;
+    display: none;
+    place-items: center;
+    z-index: 3;
+    box-shadow: inset 0 0 0 1px rgba(186, 214, 247, 0.35);
 }
 
-.rs-slider-nav:hover {
-    background: rgba(91, 141, 238, 0.35);
-    border-color: rgba(126, 166, 245, 0.6);
+.rs-clip.is-playing .rs-clip-toggle {
+    display: grid;
 }
 
-.rs-prev { left: 14px; }
-.rs-next { right: 14px; }
+.rs-clips-nav {
+    position: absolute;
+    top: 46%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(6, 10, 20, 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: #eaf1ff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    z-index: 30;
+    box-shadow: inset 0 0 0 1px rgba(186, 214, 247, 0.35);
+}
 
-.rs-slider-dots {
+.rs-clips-prev {
+    left: 4px;
+}
+
+.rs-clips-next {
+    right: 4px;
+}
+
+.rs-clips-dots {
+    display: none;
+}
+
+/* --- Bloque inferior de la sección "Sumate al C." más pequeño --- */
+.cta-boxes {
+    max-width: 680px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.cta-boxes .cta-box {
+    min-height: 0 !important;
+    height: 280px !important;
+}
+
+@media (max-width: 640px) {
+    .rs-clips {
+        height: 380px;
+        padding: 0 34px;
+    }
+
+    .cta-boxes .cta-box {
+        height: 220px !important;
+    }
+}
+
+/* ============================================================
+   Sección "Servicios UNET" — imagen a la izquierda + slider
+   vertical de cards a la derecha (se sincronizan).
+   ============================================================ */
+.rs-services {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, 92vw);
+    margin: 0 auto;
+    padding: 92px 0 44px;
+}
+
+.rs-services-body {
+    display: grid;
+    grid-template-columns: minmax(280px, 430px) 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-top: 48px;
+}
+
+.rs-services-media {
+    position: relative;
+    aspect-ratio: 9 / 14;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #05060f;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(186, 214, 247, 0.18);
+}
+
+.rs-service-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 0.7s ease, transform 7s ease;
+}
+
+.rs-service-img.is-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.rs-services-list {
+    position: relative;
+    height: 540px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000);
+    mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000);
+}
+
+.rs-services-track {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 18px;
-    z-index: 4;
-    display: flex;
-    gap: 8px;
-    justify-content: center;
+    top: 50%;
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform;
 }
 
-.rs-dot {
-    width: 8px;
-    height: 8px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
+.rs-service-card {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 18px 22px;
+    border-left: 2px solid transparent;
+    border-radius: 12px;
+    opacity: 0.34;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.28);
-    transition: width 0.25s, background 0.25s;
+    transition: opacity 0.4s ease, border-color 0.4s ease, background 0.4s ease,
+        transform 0.4s ease;
 }
 
-.rs-dot.is-active {
-    width: 26px;
-    border-radius: 99px;
-    background: var(--rs-accent);
+.rs-service-card:hover {
+    opacity: 0.7;
 }
 
-/* --- Mapa --------------------------------------------------- */
-.rs-map-wrap {
-    width: 100%;
-    position: relative;
-    min-height: 520px;
-    border-radius: 22px;
-    overflow: hidden;
-    border: 1px solid var(--rs-line);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+.rs-service-card.is-active {
+    opacity: 1;
+    border-left-color: #7db0ff;
+    background: linear-gradient(90deg, rgba(91, 141, 238, 0.14), rgba(91, 141, 238, 0) 72%);
+    transform: translateX(4px);
 }
 
-/* id > clase: gana a .maplibregl-map{position:relative} del CSS oficial */
-#rs-hero-map {
-    position: absolute;
-    inset: 0;
-    background: #05060b;
+.rs-service-num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #7db0ff;
+    padding-top: 4px;
+    min-width: 28px;
 }
 
-.rs-map-badge {
-    position: absolute;
-    z-index: 5;
-    top: 14px;
-    left: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 99px;
-    background: rgba(6, 10, 20, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+.rs-service-title {
+    font-family: "Untitled Sans", sans-serif;
+    font-weight: 700;
+    font-size: 1.18rem;
+    line-height: 1.25;
+    margin: 0 0 6px;
     color: #eaf1ff;
-    font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace;
-    letter-spacing: 0.04em;
 }
 
-.rs-map-badge-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--rs-accent);
-    box-shadow: 0 0 0 4px rgba(91, 141, 238, 0.25);
-}
-
-.rs-map-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-    color: var(--rs-muted);
-    font-size: 14px;
-}
-
-.rs-map-fallback-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--rs-accent);
-}
-
-/* Controles MapLibre en tema oscuro */
-#rs-hero-map .maplibregl-ctrl-group {
-    background: rgba(6, 10, 20, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-}
-
-#rs-hero-map .maplibregl-ctrl-group button + button {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#rs-hero-map .maplibregl-ctrl button .maplibregl-ctrl-icon {
-    filter: invert(1) brightness(1.6);
-}
-
-#rs-hero-map .maplibregl-ctrl-attrib {
-    background: rgba(255, 255, 255, 0.75);
-    font-size: 10px;
+.rs-service-desc {
+    margin: 0;
+    color: #9fb2cf;
+    font-size: 0.95rem;
+    line-height: 1.55;
 }
 
 @media (max-width: 900px) {
-    .rs-hero-split {
+    .rs-services-body {
         grid-template-columns: 1fr;
-        /* gap: 16px; */
-        margin-top: 0px;
+        gap: 30px;
     }
 
-    .rs-slider,
-    .rs-map-wrap {
-        min-height: 340px;
+    .rs-services-media {
+        aspect-ratio: 16 / 11;
+        max-width: 560px;
+        margin: 0 auto;
+    }
+
+    .rs-services-list {
+        height: 400px;
     }
 }

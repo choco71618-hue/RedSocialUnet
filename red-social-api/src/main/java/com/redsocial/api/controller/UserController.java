@@ -8,6 +8,7 @@ import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
 import com.redsocial.common.dto.UpdateProfileRequest;
 import com.redsocial.common.dto.UserDto;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +45,7 @@ public class UserController {
 
     @PutMapping("/me")
     public UserDto updateMe(@AuthenticationPrincipal UserPrincipal me,
-                            @RequestBody UpdateProfileRequest request) {
+                             @Valid @RequestBody UpdateProfileRequest request) {
         return userService.updateProfile(me.id(), request);
     }
 

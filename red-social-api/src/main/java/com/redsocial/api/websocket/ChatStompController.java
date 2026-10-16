@@ -40,6 +40,9 @@ public class ChatStompController {
         if (user == null || request.conversationId() == null) {
             return;
         }
+        if (!chatService.isParticipant(request.conversationId(), user.id())) {
+            return;
+        }
         messagingTemplate.convertAndSend("/topic/conversations." + request.conversationId() + ".typing",
                 new TypingEvent(request.conversationId(), user.getUsername(), request.typing()));
     }
