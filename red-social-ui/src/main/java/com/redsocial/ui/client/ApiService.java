@@ -11,6 +11,7 @@ import com.redsocial.common.dto.CreateConnectionRequest;
 import com.redsocial.common.dto.CreatePostRequest;
 import com.redsocial.common.dto.CreateProjectRequest;
 import com.redsocial.common.dto.DonateRequest;
+import com.redsocial.common.dto.FriendRequestDto;
 import com.redsocial.common.dto.LoginRequest;
 import com.redsocial.common.dto.MediaDto;
 import com.redsocial.common.dto.MediaType;
@@ -419,6 +420,92 @@ public class ApiService {
         try {
             return client.post().uri("/connections/" + connectionId + "/reviews").headers(auth())
                     .body(new ReviewRequest(rating, comment, reviewCode)).retrieve().body(ReviewDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public List<UserDto> friends() {
+        return get("/friends", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<FriendRequestDto> friendRequests() {
+        return get("/friends/requests", new ParameterizedTypeReference<>() {});
+    }
+
+    public List<FriendRequestDto> sentFriendRequests() {
+        return get("/friends/requests/sent", new ParameterizedTypeReference<>() {});
+    }
+
+    public long friendRequestCount() {
+        try {
+            Long count = client.get().uri("/friends/requests/count").headers(auth())
+                    .retrieve().body(Long.class);
+            return count == null ? 0 : count;
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public String friendStatus(String username) {
+        try {
+            return client.get().uri("/friends/status/" + enc(username)).headers(auth())
+                    .retrieve().body(String.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public long mutualFriends(String username) {
+        try {
+            Long count = client.get().uri("/friends/mutual/" + enc(username)).headers(auth())
+                    .retrieve().body(Long.class);
+            return count == null ? 0 : count;
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public String sendFriendRequest(String username) {
+        try {
+            return client.post().uri("/friends/requests/" + enc(username)).headers(auth())
+                    .retrieve().body(String.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public UserDto acceptFriendRequest(Long requestId) {
+        try {
+            return client.post().uri("/friends/requests/" + requestId + "/accept").headers(auth())
+                    .retrieve().body(UserDto.class);
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void rejectFriendRequest(Long requestId) {
+        try {
+            client.post().uri("/friends/requests/" + requestId + "/reject").headers(auth())
+                    .retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void cancelFriendRequest(Long requestId) {
+        try {
+            client.delete().uri("/friends/requests/" + requestId).headers(auth())
+                    .retrieve().toBodilessEntity();
+        } catch (Exception ex) {
+            throw translate(ex);
+        }
+    }
+
+    public void removeFriend(String username) {
+        try {
+            client.delete().uri("/friends/" + enc(username)).headers(auth())
+                    .retrieve().toBodilessEntity();
         } catch (Exception ex) {
             throw translate(ex);
         }

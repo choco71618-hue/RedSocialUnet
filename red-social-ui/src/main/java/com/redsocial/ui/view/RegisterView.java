@@ -81,7 +81,10 @@ LottieView ocean = new LottieView("/animations/ocean.json");
 
         TextField displayName = new TextField("Nombre");
         TextField username = new TextField("Usuario");
-        TextField email = new TextField("Email");
+        TextField email = new TextField("Email institucional");
+        email.setHelperText("Debe terminar en @unet.edu.ve");
+        TextField carnet = new TextField("Carnet universitario");
+        carnet.setHelperText("Solo números (6 a 10 dígitos)");
         PasswordField password = new PasswordField("Contraseña");
         password.setHelperText("Mínimo 8 caracteres");
 
@@ -111,23 +114,23 @@ LottieView ocean = new LottieView("/animations/ocean.json");
         sync.run();
 
         Button register = new Button("Registrarme", event -> doRegister(
-                displayName.getValue(), username.getValue(), email.getValue(), password.getValue(),
+                displayName.getValue(), username.getValue(), email.getValue(), carnet.getValue(), password.getValue(),
                 role.getValue(), career.getValue(), interest.getValue(), tutorType.getValue()));
         register.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Button goLogin = new Button("Ya tengo cuenta", event -> UI.getCurrent().navigate(LoginView.class));
         goLogin.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        card.add(title, displayName, username, email, password, role, career, interest, tutorType, register, goLogin);
+        card.add(title, displayName, username, email, carnet, password, role, career, interest, tutorType, register, goLogin);
         panel.add(card);
         return panel;
     }
 
-    private void doRegister(String displayName, String username, String email, String password,
+    private void doRegister(String displayName, String username, String email, String carnet, String password,
                             UserRole role, String career, String subjectOfInterest, TutorType tutorType) {
         try {
             AuthResponse response = api.register(new RegisterRequest(
-                    username, email, password, displayName, role, career, subjectOfInterest, tutorType));
+                    username, email, password, displayName, role, career, subjectOfInterest, tutorType, carnet));
             session.setAuth(response);
             UI.getCurrent().navigate("home");
         } catch (ApiException ex) {

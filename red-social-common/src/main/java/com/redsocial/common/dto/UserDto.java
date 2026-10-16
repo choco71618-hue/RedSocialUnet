@@ -7,6 +7,7 @@ public record UserDto(
         String username,
         String email,
         String displayName,
+        String carnet,
         String bio,
         String avatarUrl,
         String coverUrl,

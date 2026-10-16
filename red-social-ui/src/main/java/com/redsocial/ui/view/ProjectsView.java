@@ -1,5 +1,6 @@
 package com.redsocial.ui.view;
 
+import com.redsocial.common.dto.ConversationDto;
 import com.redsocial.common.dto.CreateProjectRequest;
 import com.redsocial.common.dto.ProjectDto;
 import com.redsocial.common.dto.ProjectKind;
@@ -112,6 +113,7 @@ public class ProjectsView extends ProtectedView {
         }
         try {
             List<ProjectDto> projects = api.projects(kind, status);
+            content.removeAll();
             if (projects.isEmpty()) {
                 content.add(emptyState(kind));
                 return;
@@ -120,6 +122,7 @@ public class ProjectsView extends ProtectedView {
                 content.add(render(project, kind));
             }
         } catch (ApiException ex) {
+            content.removeAll();
             Toast.show(ex.getMessage());
         }
     }
@@ -161,8 +164,26 @@ public class ProjectsView extends ProtectedView {
             delete.addClassName("action-btn");
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
             card.add(delete);
+        } else {
+            Button collaborate = new Button("Colaborar", VaadinIcon.HANDSHAKE.create(),
+                    event -> collaborate(project));
+            collaborate.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            collaborate.addClassName("project-collaborate");
+
+            HorizontalLayout actions = new HorizontalLayout(collaborate);
+            actions.addClassName("project-actions");
+            card.add(actions);
         }
         return card;
+    }
+
+    private void collaborate(ProjectDto project) {
+        try {
+            ConversationDto conversation = api.startConversation(project.creatorId());
+            UI.getCurrent().navigate("chat?conversation=" + conversation.id());
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
     }
 
     private boolean isMine(ProjectDto project) {

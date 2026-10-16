@@ -351,6 +351,7 @@ body::before {
     animation: rs-fade-up 0.45s var(--rs-ease) both;
     position: relative;
     z-index: 1;
+    padding-top: 80px !important;
 }
 
 /* Layout con rail derecho (≥1600px) */
@@ -474,6 +475,7 @@ body::before {
     position: relative;
     transition: background 0.25s var(--rs-ease), border-color 0.25s var(--rs-ease), transform 0.2s var(--rs-ease);
     animation: rs-fade-up 0.4s var(--rs-ease) both;
+    padding: 20px !important;
 }
 
 /* Puntos blueprint en esquinas (tarjetas no-componente) */
@@ -809,6 +811,9 @@ vaadin-button:focus-visible { outline: 2px solid var(--rs-accent); outline-offse
 .project-status.status-completed { background: rgba(52, 211, 153, 0.12); color: #5fd6a3; }
 
 .project-delete { position: absolute; top: 16px; right: 20px; }
+
+.project-actions { margin-top: 14px; display: flex; justify-content: flex-end; }
+.project-collaborate { flex: none; }
 
 /* ============================================================
    Chat

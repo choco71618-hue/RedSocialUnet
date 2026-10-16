@@ -170,6 +170,7 @@ public class NotificationsBell extends Div {
                     QueryParameters.simple(Map.of("conversation", String.valueOf(dto.targetId()))));
             case DONATION -> ui.navigate("projects");
             case CONNECTION, REVIEW -> ui.navigate("preparadurias");
+            case FRIEND_REQUEST, FRIEND_ACCEPT -> ui.navigate("profile/" + dto.actorUsername());
             case LIKE, COMMENT -> ui.navigate("home");
         }
     }
@@ -183,6 +184,8 @@ public class NotificationsBell extends Div {
             case DONATION -> "$";
             case CONNECTION -> "🤝";
             case REVIEW -> "★";
+            case FRIEND_REQUEST -> "＋";
+            case FRIEND_ACCEPT -> "✓";
         };
     }
 }

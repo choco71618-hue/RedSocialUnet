@@ -28,6 +28,9 @@ public class AuthService {
 
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,30}$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern UNET_EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@unet\\.edu\\.ve$");
+    private static final Pattern CARNET_PATTERN = Pattern.compile("^\\d{6,10}$");
 
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
@@ -65,6 +68,13 @@ public class AuthService {
         if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new BadRequestException("El email no es válido");
         }
+        if (!UNET_EMAIL_PATTERN.matcher(email).matches()) {
+            throw new BadRequestException("Usá tu correo institucional @unet.edu.ve");
+        }
+        String carnet = trim(request.carnet());
+        if (carnet != null && !CARNET_PATTERN.matcher(carnet).matches()) {
+            throw new BadRequestException("El carnet debe tener entre 6 y 10 dígitos");
+        }
         if (password == null || password.length() < 8) {
             throw new BadRequestException("La contraseña debe tener al menos 8 caracteres");
         }
@@ -97,6 +107,7 @@ public class AuthService {
         User user = User.builder()
                 .username(username)
                 .email(email)
+                .carnet(carnet)
                 .password(passwordEncoder.encode(password))
                 .displayName(displayName == null ? username : displayName)
                 .role(role == null ? "USER" : role.name())

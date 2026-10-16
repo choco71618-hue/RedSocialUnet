@@ -39,6 +39,7 @@ public class DtoMapper {
                 user.getUsername(),
                 includeEmail ? user.getEmail() : null,
                 user.getDisplayName(),
+                user.getCarnet(),
                 user.getBio(),
                 user.getAvatarUrl(),
                 user.getCoverUrl(),

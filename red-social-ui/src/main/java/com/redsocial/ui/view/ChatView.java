@@ -195,6 +195,7 @@ public class ChatView extends ProtectedView {
         }
         try {
             List<ConversationDto> conversations = api.conversations();
+            conversationList.removeAll();
             if (conversations.isEmpty()) {
                 conversationList.add(emptyState("Sin conversaciones", "Creá una nueva para empezar."));
                 return;
@@ -203,6 +204,7 @@ public class ChatView extends ProtectedView {
                 conversationList.add(conversationItem(conversation));
             }
         } catch (ApiException ex) {
+            conversationList.removeAll();
             Toast.show(ex.getMessage());
         }
     }

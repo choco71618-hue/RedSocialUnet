@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false, length = 150)
     private String email;
 
+    @Column(length = 20)
+    private String carnet;
+
     @Column(nullable = false)
     private String password;
 

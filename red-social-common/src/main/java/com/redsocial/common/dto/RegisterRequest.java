@@ -12,6 +12,8 @@ public record RegisterRequest(
         String username,
         @NotBlank(message = "El email es obligatorio")
         @Email(message = "El email no es válido")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@unet\\.edu\\.ve$",
+                message = "Usá tu correo institucional @unet.edu.ve")
         String email,
         @NotBlank(message = "La contraseña es obligatoria")
         @Size(min = 8, max = 100, message = "La contraseña debe tener al menos 8 caracteres")
@@ -23,10 +25,13 @@ public record RegisterRequest(
         String career,
         @Size(max = 120, message = "La materia de interés no puede superar los 120 caracteres")
         String subjectOfInterest,
-        TutorType tutorType
+        TutorType tutorType,
+        @Pattern(regexp = "^$|^\\d{6,10}$",
+                message = "El carnet debe tener entre 6 y 10 dígitos")
+        String carnet
 ) {
     /** Compatibilidad con el registro social clásico (sin rol académico). */
     public RegisterRequest(String username, String email, String password, String displayName) {
-        this(username, email, password, displayName, null, null, null, null);
+        this(username, email, password, displayName, null, null, null, null, null);
     }
 }

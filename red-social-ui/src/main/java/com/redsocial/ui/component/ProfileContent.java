@@ -1,6 +1,7 @@
 package com.redsocial.ui.component;
 
 import com.redsocial.common.dto.ConversationDto;
+import com.redsocial.common.dto.FriendRequestDto;
 import com.redsocial.common.dto.MediaDto;
 import com.redsocial.common.dto.PageResponse;
 import com.redsocial.common.dto.PostDto;
@@ -167,6 +168,13 @@ public class ProfileContent extends VerticalLayout {
                 statPill(user.followersCount(), "seguidores", () -> openFollowList(user, true)),
                 statPill(user.followingCount(), "siguiendo", () -> openFollowList(user, false)),
                 statPill(user.postsCount(), "publicaciones", null));
+        boolean selfProfile = username == null
+                || (session.getUser() != null && Objects.equals(session.getUser().id(), user.id()));
+        if (selfProfile) {
+            stats.add(statPill(safeFriendsCount(), "amigos", this::openFriendsDialog));
+        } else {
+            stats.add(statPill(safeMutual(user.username()), "en común", null));
+        }
         stats.addClassName("profile-stats");
 
         VerticalLayout info = new VerticalLayout();
@@ -289,7 +297,8 @@ public class ProfileContent extends VerticalLayout {
     private HorizontalLayout academicChips(UserDto user) {
         HorizontalLayout row = new HorizontalLayout();
         row.addClassName("profile-academic");
-        boolean any = false;
+        boolean any = chip(row, user.carnet() == null || user.carnet().isBlank()
+                ? null : ("Carnet " + user.carnet()), "academic-chip");
         if ("STUDENT".equals(user.role())) {
             any = chip(row, "Estudiante", "role-student") || any;
             any = chip(row, user.career(), "academic-chip") || any;
@@ -333,6 +342,7 @@ public class ProfileContent extends VerticalLayout {
 
             actions.add(edit, logout);
         } else {
+            Button friend = friendButton(user);
             Button follow = new Button(user.following() ? "Dejar de seguir" : "Seguir",
                     event -> toggleFollow(user));
             if (!user.following()) {
@@ -340,9 +350,147 @@ public class ProfileContent extends VerticalLayout {
             }
             Button message = new Button("Mensaje", event -> startChat(user));
             message.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-            actions.add(follow, message);
+            actions.add(friend, follow, message);
         }
         return actions;
+    }
+
+    private Button friendButton(UserDto user) {
+        String status;
+        try {
+            status = api.friendStatus(user.username());
+        } catch (ApiException ex) {
+            status = "NONE";
+        }
+        Button button = switch (status == null ? "NONE" : status) {
+            case "ACCEPTED" -> new Button("Amigos",
+                    com.vaadin.flow.component.icon.VaadinIcon.USERS.create(),
+                    event -> removeFriend(user.username()));
+            case "PENDING_OUT" -> new Button("Solicitud enviada",
+                    event -> cancelOutgoing(user.username()));
+            case "PENDING_IN" -> new Button("Aceptar solicitud",
+                    com.vaadin.flow.component.icon.VaadinIcon.CHECK.create(),
+                    event -> acceptIncoming(user.username()));
+            default -> new Button("Añadir amigo",
+                    com.vaadin.flow.component.icon.VaadinIcon.USER.create(),
+                    event -> sendFriendRequest(user.username()));
+        };
+        switch (status == null ? "NONE" : status) {
+            case "ACCEPTED", "PENDING_OUT" -> button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+            case "PENDING_IN" -> button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+            default -> button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        }
+        button.addClassName("profile-friend");
+        return button;
+    }
+
+    private void sendFriendRequest(String username) {
+        try {
+            api.sendFriendRequest(username);
+            Toast.show("Solicitud de amistad enviada");
+            refresh();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+    }
+
+    private void removeFriend(String username) {
+        try {
+            api.removeFriend(username);
+            Toast.show("Amistad eliminada");
+            refresh();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+    }
+
+    private void acceptIncoming(String username) {
+        try {
+            for (FriendRequestDto request : api.friendRequests()) {
+                if (request.user() != null && username.equalsIgnoreCase(request.user().username())) {
+                    api.acceptFriendRequest(request.id());
+                    break;
+                }
+            }
+            Toast.show("¡Ahora son amigos!");
+            refresh();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+    }
+
+    private void cancelOutgoing(String username) {
+        try {
+            for (FriendRequestDto request : api.sentFriendRequests()) {
+                if (request.user() != null && username.equalsIgnoreCase(request.user().username())) {
+                    api.cancelFriendRequest(request.id());
+                    break;
+                }
+            }
+            Toast.show("Solicitud cancelada");
+            refresh();
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+    }
+
+    private long safeFriendsCount() {
+        try {
+            return api.friends().size();
+        } catch (ApiException ex) {
+            return 0;
+        }
+    }
+
+    private long safeMutual(String username) {
+        try {
+            return api.mutualFriends(username);
+        } catch (ApiException ex) {
+            return 0;
+        }
+    }
+
+    private void openFriendsDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Amigos");
+        VerticalLayout list = new VerticalLayout();
+        list.addClassName("rs-gap-sm");
+        try {
+            java.util.List<UserDto> friends = api.friends();
+            if (friends.isEmpty()) {
+                list.add(emptyState("Sin amigos todavía", "Enviá solicitudes desde el perfil de otros usuarios."));
+            } else {
+                for (UserDto friend : friends) {
+                    list.add(friendRow(dialog, friend));
+                }
+            }
+        } catch (ApiException ex) {
+            Toast.show(ex.getMessage());
+        }
+        dialog.add(list);
+        dialog.open();
+    }
+
+    private Div friendRow(Dialog dialog, UserDto user) {
+        Avatar avatar = AvatarUtil.of(user);
+        avatar.addClassName("rs-avatar-sm");
+
+        Span name = new Span(display(user));
+        name.addClassName("post-author");
+        name.addClickListener(event -> {
+            dialog.close();
+            UI.getCurrent().navigate("profile/" + user.username());
+        });
+        Span handle = new Span("@" + user.username());
+        handle.addClassName("post-handle");
+
+        VerticalLayout info = new VerticalLayout(name, handle);
+
+        Div card = new Div();
+        card.addClassName("user-card");
+        card.addClassName("explore-user-row");
+        card.add(avatar, info);
+        return card;
     }
 
     private void toggleFollow(UserDto user) {
